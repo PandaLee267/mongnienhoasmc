@@ -22,6 +22,37 @@
   div.bg-slate-800.rounded-2xl{background:linear-gradient(160deg,rgba(23,38,100,.88),rgba(9,16,52,.9))!important;border:1px solid rgba(147,197,253,.22);box-shadow:0 10px 40px rgba(0,0,0,.5);backdrop-filter:blur(14px)}
   #photoGrid>div{transition:transform .25s,box-shadow .25s}
   #photoGrid>div:hover{transform:translateY(-4px);box-shadow:0 16px 50px rgba(90,130,255,.35)}
+  #photoGrid img.card-img{transition:transform .5s}
+  #photoGrid>div:hover img.card-img{transform:scale(1.06)}
+  #photoGrid b.text-amber-400{text-shadow:0 0 14px rgba(251,191,36,.65)}
+  #photoGrid .scoreBtn.bg-amber-500{animation:glowBtn 2.2s ease-in-out infinite}
+  @keyframes glowBtn{0%,100%{box-shadow:0 0 8px rgba(245,158,11,.4)}50%{box-shadow:0 0 24px rgba(245,158,11,.85)}}
+  /* popup chấm */
+  #modal{animation:fade .25s ease}
+  #modal:not(.hidden)>div{animation:pop .32s cubic-bezier(.2,1.4,.4,1)}
+  @keyframes fade{from{opacity:0}}
+  @keyframes pop{from{opacity:0;transform:scale(.92) translateY(16px)}}
+  #modal input[type=range]{-webkit-appearance:none;appearance:none;height:8px;border-radius:99px;background:linear-gradient(90deg,#f59e0b var(--p,80%),#334155 var(--p,80%));outline:none;cursor:pointer}
+  #modal input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fef3c7,#f59e0b);box-shadow:0 0 14px rgba(245,158,11,.9);cursor:pointer}
+  #modal input[type=range]::-moz-range-thumb{width:22px;height:22px;border:none;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fef3c7,#f59e0b);box-shadow:0 0 14px rgba(245,158,11,.9);cursor:pointer}
+  #modal input[type=range]:disabled{opacity:.55;cursor:not-allowed}
+  #scoreVal{text-shadow:0 0 20px rgba(251,191,36,.75)}
+  #mAvg{text-shadow:0 0 12px rgba(251,191,36,.4)}
+  .crit i{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#fef3c7,#f59e0b);font-style:normal;margin-right:6px;box-shadow:0 0 10px rgba(245,158,11,.5)}
+  /* đăng nhập */
+  #loginOverlay>div{animation:rise .5s ease}
+  @keyframes rise{from{opacity:0;transform:translateY(26px) scale(.98)}}
+  #loginOverlay input{background:rgba(2,6,23,.7)}
+  #btnLogin{box-shadow:0 0 26px rgba(245,158,11,.45);transition:.25s}
+  #btnLogin:hover{box-shadow:0 0 40px rgba(245,158,11,.8);transform:translateY(-1px)}
+  /* chung */
+  ::selection{background:#f59e0b;color:#1e1b4b}
+  ::-webkit-scrollbar{width:10px;height:10px}
+  ::-webkit-scrollbar-track{background:#060d2b}
+  ::-webkit-scrollbar-thumb{background:#2b3a75;border-radius:99px}
+  button{transition:transform .15s,box-shadow .2s,filter .2s}
+  button:active{transform:scale(.97)}
+  input:focus,textarea:focus,select:focus{border-color:#fbbf24!important;box-shadow:0 0 0 3px rgba(251,191,36,.15)}
 </style>
 </head>
 <body class="text-slate-100 min-h-screen">
@@ -30,7 +61,7 @@
   <!-- Hero banner cuộc thi -->
   <div class="relative rounded-3xl overflow-hidden mb-4 ring-1 ring-blue-300/30 shadow-[0_0_70px_rgba(80,120,255,.35)]">
     <div class="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-[#0a1445] to-[#24348f] p-8 text-center">
-      <p class="text-amber-200 tracking-[0.3em] text-xs font-bold">🌸 DREAMS OF YOUTH 🌸</p>
+      <p class="text-amber-200 tracking-[0.2em] text-xs font-bold">🌸 MỘNG NIÊN HOA | DREAMS OF YOUTH 🌸</p>
       <h1 class="text-4xl md:text-5xl font-extrabold text-white">MỘNG NIÊN HOA</h1>
       <p class="text-blue-200/80 text-sm italic mt-1">Nơi thanh xuân được kể bằng những khung hình</p>
     </div>
@@ -119,7 +150,7 @@
         </div>
       </div>
       <div class="mt-4 pt-4 border-t border-slate-700">
-        <h3 class="font-bold text-sm mb-2">📤 Tài khoản Thí sinh — dùng chung (đăng nhập: thisinh)</h3>
+        <h3 class="font-bold text-sm mb-2">📤 Tài khoản Thí sinh — dùng chung (đăng nhập: smcsaodo)</h3>
         <div class="flex gap-2">
           <input id="newViewerPass" type="password" placeholder="Mật khẩu thí sinh mới..." class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-sm outline-none">
           <button id="btnViewerPass" class="px-4 bg-slate-700 rounded-xl py-2 text-sm font-bold">Đổi</button>
@@ -150,25 +181,25 @@
 
 <!-- Màn hình đăng nhập -->
 <div id="loginOverlay" class="fixed inset-0 z-[100] flex items-center justify-center p-4" style="background:rgba(4,8,31,.88);backdrop-filter:blur(8px)">
-  <div class="w-full max-w-3xl grid md:grid-cols-2 rounded-3xl overflow-hidden ring-1 ring-blue-300/30 shadow-[0_0_80px_rgba(80,120,255,.4)]" style="background:linear-gradient(160deg,rgba(23,38,100,.96),rgba(9,16,52,.98))">
-    <div class="relative hidden md:block min-h-[420px]">
-      <div class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
-        <p class="text-amber-200 tracking-[0.3em] text-[11px] font-bold">🌸 DREAMS OF YOUTH 🌸</p>
-        <h2 class="text-3xl font-extrabold text-white">MỘNG NIÊN HOA</h2>
+  <div class="w-full max-w-md rounded-3xl overflow-hidden ring-1 ring-blue-300/30 shadow-[0_0_80px_rgba(80,120,255,.4)]" style="background:linear-gradient(160deg,rgba(23,38,100,.96),rgba(9,16,52,.98))">
+    <div class="relative bg-[#0a1445]">
+      <div class="absolute inset-0 flex items-center justify-center p-6 text-center">
+        <p class="text-amber-200 tracking-[0.2em] text-[11px] font-bold">MỘNG NIÊN HOA | DREAMS OF YOUTH</p>
       </div>
-      <img src="ảnh nền cuộc thi.jpg" alt="Mộng Niên Hoa" class="absolute inset-0 w-full h-full object-cover" onerror="this.remove()">
+      <img src="ảnh nền cuộc thi.jpg" alt="Mộng Niên Hoa | Dreams of Youth" class="relative w-full" onerror="this.remove()">
+      <div class="absolute bottom-0 inset-x-0 h-16 pointer-events-none" style="background:linear-gradient(to top,#141f5c,transparent)"></div>
     </div>
-    <div class="p-8">
+    <div class="px-8 pb-8 pt-3">
       <h2 class="text-2xl font-extrabold text-white">Đăng nhập</h2>
-      <p class="text-blue-200/70 text-sm mb-6">Cuộc thi ảnh Mộng Niên Hoa</p>
-      <label class="text-xs text-slate-400">Tên đăng nhập</label>
-      <input id="loginUser" placeholder="VD: admin / thisinh / tên BGK..." autocomplete="username" class="w-full mt-1 mb-3 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 outline-none focus:border-amber-400">
-      <label class="text-xs text-slate-400">Mật khẩu</label>
-      <input id="loginPass" type="password" placeholder="••••••••" autocomplete="current-password" class="w-full mt-1 mb-2 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 outline-none focus:border-amber-400">
+      <p class="text-blue-200/70 text-xs italic mb-6">Nơi thanh xuân được kể bằng những khung hình</p>
+      <label class="text-xs font-bold text-slate-300 tracking-wider">TÊN ĐĂNG NHẬP</label>
+      <input id="loginUser" placeholder="Nhập tên đăng nhập..." autocomplete="username" class="w-full mt-1 mb-4 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 outline-none focus:border-amber-400">
+      <label class="text-xs font-bold text-slate-300 tracking-wider">MẬT KHẨU</label>
+      <input id="loginPass" type="password" placeholder="Nhập mật khẩu..." autocomplete="current-password" class="w-full mt-1 mb-2 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 outline-none focus:border-amber-400">
       <p id="loginErr" class="hidden text-xs text-red-400 mb-2"></p>
-      <button id="btnLogin" class="w-full bg-amber-500 text-black font-bold rounded-xl py-2.5 mt-1">Đăng nhập →</button>
-      <p class="text-center mt-2"><button id="btnForgot" class="text-xs text-slate-500 underline">Quên mật khẩu admin?</button></p>
-      <div class="text-xs text-slate-500 mt-4 leading-relaxed">BGK: tên do BTC cấp • Thí sinh: <b class="text-slate-300">thisinh</b> • Admin: <b class="text-slate-300">admin</b><br>Liên hệ BTC để lấy mật khẩu.</div>
+      <button id="btnLogin" class="w-full bg-amber-500 text-black font-bold rounded-xl py-2.5 mt-2">Đăng nhập →</button>
+      <p class="text-center mt-3"><button id="btnForgot" class="text-xs text-slate-500 hover:text-slate-300 underline">Quên mật khẩu?</button></p>
+      <div class="text-xs text-slate-500 mt-4 leading-relaxed text-center">Tài khoản do <b class="text-amber-300">SMCSAODO</b> cấp.<br>Liên hệ BTC để lấy mật khẩu.</div>
     </div>
   </div>
 </div>
@@ -183,15 +214,15 @@
     <p id="mAvg" class="text-sm text-amber-400 font-bold mb-3"></p>
     <div class="space-y-3 bg-slate-900 rounded-xl p-3">
       <div>
-        <div class="flex justify-between text-sm"><span>💡 Ý tưởng & sáng tạo</span><b id="v1" class="text-amber-400">8.0</b></div>
+        <div class="flex justify-between items-center text-sm mb-1"><span class="crit"><i>💡</i>Ý tưởng & sáng tạo</span><b id="v1" class="text-amber-400">8.0</b></div>
         <input id="mC1" type="range" min="1" max="10" step="0.5" value="8" class="w-full">
       </div>
       <div>
-        <div class="flex justify-between text-sm"><span>💭 Nội dung & thông điệp</span><b id="v2" class="text-amber-400">8.0</b></div>
+        <div class="flex justify-between items-center text-sm mb-1"><span class="crit"><i>💭</i>Nội dung & thông điệp</span><b id="v2" class="text-amber-400">8.0</b></div>
         <input id="mC2" type="range" min="1" max="10" step="0.5" value="8" class="w-full">
       </div>
       <div>
-        <div class="flex justify-between text-sm"><span>🎨 Hình ảnh & thẩm mỹ</span><b id="v3" class="text-amber-400">8.0</b></div>
+        <div class="flex justify-between items-center text-sm mb-1"><span class="crit"><i>🎨</i>Hình ảnh & thẩm mỹ</span><b id="v3" class="text-amber-400">8.0</b></div>
         <input id="mC3" type="range" min="1" max="10" step="0.5" value="8" class="w-full">
       </div>
     </div>
@@ -297,14 +328,14 @@ $('btnAddJ').onclick = ()=>{
   judges[n]=p; $('newJName').value=''; $('newJPass').value=''; saveJudges(); applyRole(); alert('Đã tạo TK BGK: '+n);
 };
 // ---------- đăng nhập: admin (1 TK) / BGK (TK riêng) / thí sinh (1 TK chung: thisinh) ----------
-const getViewerPass = () => localStorage.getItem('pc_viewer_pass')||'thisinh123';
+const getViewerPass = () => localStorage.getItem('pc_viewer_pass')||'smcsaodo';
 let viewerOK = sessionStorage.getItem('pc_viewer')==='1';
 function doLogin(){
   const u=$('loginUser').value.trim(), p=$('loginPass').value, err=$('loginErr');
   const fail = m => { err.textContent=m; err.classList.remove('hidden'); };
   if(u==='admin' && p===getPass()){ role='admin'; adminOK=true; sessionStorage.setItem('pc_admin','1'); }
   else if(judges[u] && judges[u]===p){ role='judge'; judgeUser=u; sessionStorage.setItem('pc_judge_user',u); }
-  else if(u==='thisinh' && p===getViewerPass()){ role='uploader'; viewerOK=true; sessionStorage.setItem('pc_viewer','1'); }
+  else if(u==='smcsaodo' && p===getViewerPass()){ role='uploader'; viewerOK=true; sessionStorage.setItem('pc_viewer','1'); }
   else return fail('Sai tên đăng nhập hoặc mật khẩu!');
   localStorage.setItem('pc_role',role);
   $('loginPass').value=''; err.classList.add('hidden');
@@ -446,6 +477,7 @@ function openModal(id){
   updModal(); $('modal').classList.remove('hidden');
 }
 function updModal(){
+  ['mC1','mC2','mC3'].forEach(i=>{ const el=$(i); el.style.setProperty('--p',((el.value-1)/9*100)+'%'); });
   const t=((+$('mC1').value)+(+$('mC2').value)+(+$('mC3').value))/3;
   $('v1').textContent=(+$('mC1').value).toFixed(1); $('v2').textContent=(+$('mC2').value).toFixed(1); $('v3').textContent=(+$('mC3').value).toFixed(1);
   $('scoreVal').textContent=t.toFixed(1);
