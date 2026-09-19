@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MỘNG NIÊN HOA | DREAMS OF YOUTH — Chấm Thi Ảnh</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%230a1445'/%3E%3Cpath d='M32 8l6.2 12.9 14.1 1.9-10.3 9.7 2.6 14-12.6-6.9-12.6 6.9 2.6-14-10.3-9.7 14.1-1.9z' fill='%23fbbf24'/%3E%3C/svg%3E">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<style>
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:#060d2b;background-image:linear-gradient(180deg,#0a1445 0%,#060d2b 60%,#04081f 100%);background-attachment:fixed;min-height:100vh}
+  body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.8;
+    background-image:radial-gradient(1.5px 1.5px at 12% 22%,#fff,transparent),radial-gradient(1px 1px at 32% 8%,#fff,transparent),radial-gradient(2px 2px at 55% 15%,#fef9c3,transparent),radial-gradient(1px 1px at 72% 28%,#fff,transparent),radial-gradient(1.5px 1.5px at 88% 12%,#fff,transparent),radial-gradient(1px 1px at 45% 35%,#bfdbfe,transparent),radial-gradient(1px 1px at 8% 55%,#fff,transparent),radial-gradient(2px 2px at 95% 45%,#fef9c3,transparent),radial-gradient(1px 1px at 25% 70%,#fff,transparent),radial-gradient(1.5px 1.5px at 65% 60%,#fff,transparent),radial-gradient(1px 1px at 80% 80%,#bfdbfe,transparent),radial-gradient(1px 1px at 5% 85%,#fff,transparent);
+    animation:tw 4s ease-in-out infinite alternate}
+  @keyframes tw{from{opacity:.45}to{opacity:.9}}
+  body>div{position:relative;z-index:1}
+  input[type=range]{accent-color:#fbbf24}
+  .card-img{aspect-ratio:4/3;object-fit:cover}
+  .tab-active{background:linear-gradient(135deg,#fef3c7,#f59e0b)!important;color:#1e1b4b!important;box-shadow:0 0 18px rgba(245,158,11,.5)}
+  button.bg-amber-500{background:linear-gradient(135deg,#fde68a,#f59e0b)!important;color:#1e1b4b!important}
+  div.bg-slate-800.rounded-2xl{background:linear-gradient(160deg,rgba(23,38,100,.88),rgba(9,16,52,.9))!important;border:1px solid rgba(147,197,253,.22);box-shadow:0 10px 40px rgba(0,0,0,.5);backdrop-filter:blur(14px)}
+  #photoGrid>div{transition:transform .25s,box-shadow .25s}
+  #photoGrid>div:hover{transform:translateY(-4px);box-shadow:0 16px 50px rgba(90,130,255,.35)}
+</style>
+</head>
+<body class="text-slate-100 min-h-screen">
+<div class="max-w-6xl mx-auto px-4 py-6">
+
+  <!-- Hero banner cuộc thi -->
+  <div class="relative rounded-3xl overflow-hidden mb-4 ring-1 ring-blue-300/30 shadow-[0_0_70px_rgba(80,120,255,.35)]">
+    <div class="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-[#0a1445] to-[#24348f] p-8 text-center">
+      <p class="text-amber-200 tracking-[0.3em] text-xs font-bold">🌸 DREAMS OF YOUTH 🌸</p>
+      <h1 class="text-4xl md:text-5xl font-extrabold text-white">MỘNG NIÊN HOA</h1>
+      <p class="text-blue-200/80 text-sm italic mt-1">Nơi thanh xuân được kể bằng những khung hình</p>
+    </div>
+    <img src="ảnh nền cuộc thi.jpg" alt="Mộng Niên Hoa - Dreams of Youth" class="relative w-full" onerror="this.remove()">
+    <div class="absolute bottom-0 inset-x-0 h-20 bg-gradient-to-t from-[#060d2b] to-transparent pointer-events-none"></div>
+  </div>
+  <div class="text-center mb-6">
+    <p class="text-blue-200/70 text-sm">BGK chấm độc lập • Chỉ hiện <b class="text-amber-300">điểm trung bình chung</b></p>
+    <div id="connBadge" class="inline-block mt-2 text-xs px-3 py-1 rounded-full bg-slate-700">⚪ Chưa kết nối đa thiết bị (lưu máy này)</div>
+  </div>
+
+  <!-- User bar -->
+  <div class="bg-slate-800 rounded-2xl p-4 mb-4 flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
+    <div class="flex items-center gap-3">
+      <div id="userAvatar" class="w-11 h-11 rounded-full flex items-center justify-center text-2xl shrink-0" style="background:linear-gradient(135deg,#fef3c7,#f59e0b);box-shadow:0 0 18px rgba(245,158,11,.5)">👑</div>
+      <div class="min-w-0">
+        <div id="userName" class="font-bold truncate">…</div>
+        <div id="roleBadge" class="text-xs text-slate-400"></div>
+      </div>
+      <button id="btnLogout" class="ml-2 px-3 py-1.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-xs font-bold shrink-0">Thoát</button>
+    </div>
+    <div class="flex flex-col md:flex-row gap-3 md:items-center">
+      <div class="flex gap-2 flex-wrap" id="tabBar">
+        <button data-tab="score" class="tab tab-active px-4 py-2 rounded-xl bg-slate-700 font-bold">Chấm thi</button>
+        <button data-tab="upload" class="tab px-4 py-2 rounded-xl bg-slate-700 font-bold">Đăng ảnh</button>
+        <button data-tab="board" class="tab px-4 py-2 rounded-xl bg-slate-700 font-bold">Bảng điểm</button>
+        <button data-tab="setup" class="tab px-4 py-2 rounded-xl bg-slate-700 font-bold">⚙️</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCORE TAB -->
+  <div id="tab-score">
+    <p id="lockBanner" class="hidden text-center text-sm bg-red-900/60 border border-red-500/40 rounded-xl px-4 py-2 mb-4">🔒 Đã hết hạn chấm điểm.</p>
+    <div id="photoGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    <p id="emptyMsg" class="text-center text-slate-500 py-10 hidden">Chưa có ảnh nào. Vào tab <b>Đăng ảnh</b> để tải lên.</p>
+  </div>
+
+  <!-- UPLOAD TAB -->
+  <div id="tab-upload" class="hidden">
+    <div class="bg-slate-800 rounded-2xl p-5 max-w-xl mx-auto">
+      <h2 class="font-bold text-lg mb-3">📤 Đăng bài dự thi — MỘNG NIÊN HOA</h2>
+      <input id="upTitle" placeholder="Tên tác phẩm" class="w-full mb-2 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 outline-none focus:border-amber-500">
+      <input id="upAuthor" placeholder="Tên tác giả" class="w-full mb-2 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 outline-none focus:border-amber-500">
+      <textarea id="upDesc" rows="3" placeholder="💭 Nội dung / ý nghĩa bức ảnh..." class="w-full mb-2 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 outline-none focus:border-amber-500 text-sm"></textarea>
+      <input id="upFile" type="file" accept="image/*" multiple class="w-full mb-3 text-sm text-slate-400">
+      <div id="upQueue" class="grid grid-cols-3 gap-2 mb-3"></div>
+      <button id="btnUpload" class="w-full bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-xl py-3">Đăng ảnh</button>
+      <p class="text-xs text-slate-500 mt-2">Chọn được nhiều ảnh 1 lúc • bấm ✕ để bỏ ảnh nhầm • nhiều ảnh thì tên tự đánh số (1),(2)...</p>
+    </div>
+  </div>
+
+  <!-- BOARD TAB -->
+  <div id="tab-board" class="hidden">
+    <div class="flex gap-2 mb-4 flex-wrap" id="adminBar">
+      <button id="btnExport" class="px-4 py-2 rounded-xl bg-emerald-600 font-bold text-sm">⬇ Xuất CSV</button>
+      <button id="btnBackup" class="px-4 py-2 rounded-xl bg-sky-600 font-bold text-sm">💾 Backup JSON</button>
+      <button id="btnRestore" class="px-4 py-2 rounded-xl bg-slate-600 font-bold text-sm">📥 Khôi phục</button>
+      <input id="restoreFile" type="file" accept="application/json" class="hidden">
+      <button id="btnToggleDetail" class="px-4 py-2 rounded-xl bg-slate-700 font-bold text-sm">👁 Hiện chi tiết ai chấm</button>
+      <button id="btnReset" class="px-4 py-2 rounded-xl bg-red-600/80 font-bold text-sm">🗑 Xóa toàn bộ</button>
+    </div>
+    <p id="viewerNote" class="hidden text-xs text-slate-500 mb-3">🔒 Bạn đang ở quyền xem điểm: chỉ thấy điểm trung bình chung, không thấy ai chấm bao nhiêu.</p>
+    <div id="boardList" class="space-y-3"></div>
+  </div>
+
+  <!-- SETUP TAB -->
+  <div id="tab-setup" class="hidden">
+    <div class="bg-slate-800 rounded-2xl p-5 max-w-2xl mx-auto">
+      <h2 class="font-bold text-lg mb-2">⚙️ Đồng bộ nhiều thiết bị (Firebase miễn phí)</h2>
+      <ol class="text-sm text-slate-300 list-decimal ml-5 space-y-1 mb-3">
+        <li>Vào <b>console.firebase.google.com</b> → tạo project → <b>Realtime Database</b> → chế độ test mode.</li>
+        <li>Project settings → dán config bên dưới → Lưu. Mọi máy mở cùng link là chấm chung.</li>
+      </ol>
+      <textarea id="fbConfig" rows="5" placeholder='{"apiKey":"...","authDomain":"...","databaseURL":"...","projectId":"..."}' class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs font-mono outline-none"></textarea>
+      <div class="flex gap-2 mt-3">
+        <button id="btnSaveFb" class="flex-1 bg-amber-500 text-black font-bold rounded-xl py-2">Kết nối</button>
+        <button id="btnClearFb" class="px-4 bg-slate-700 rounded-xl py-2">Ngắt</button>
+      </div>
+      <p class="text-xs text-slate-500 mt-2">Không nhập = chế độ 1 máy (localStorage). Nhập = đa thiết bị real-time.</p>
+      <div id="passBox" class="mt-4 pt-4 border-t border-slate-700">
+        <h3 class="font-bold text-sm mb-2">🔑 Tài khoản Admin — duy nhất (đăng nhập: admin)</h3>
+        <div class="flex gap-2">
+          <input id="newPass" type="password" placeholder="Mật khẩu admin mới..." class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-sm outline-none">
+          <button id="btnPass" class="px-4 bg-slate-700 rounded-xl py-2 text-sm font-bold">Đổi</button>
+        </div>
+      </div>
+      <div class="mt-4 pt-4 border-t border-slate-700">
+        <h3 class="font-bold text-sm mb-2">📤 Tài khoản Thí sinh — dùng chung (đăng nhập: thisinh)</h3>
+        <div class="flex gap-2">
+          <input id="newViewerPass" type="password" placeholder="Mật khẩu thí sinh mới..." class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-sm outline-none">
+          <button id="btnViewerPass" class="px-4 bg-slate-700 rounded-xl py-2 text-sm font-bold">Đổi</button>
+        </div>
+      </div>
+      <div class="mt-4 pt-4 border-t border-slate-700">
+        <h3 class="font-bold text-sm mb-2">🔒 Chốt điểm / deadline</h3>
+        <div class="flex gap-2 flex-wrap items-center">
+          <input id="lockDeadline" type="datetime-local" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm outline-none">
+          <button id="btnLockSave" class="px-4 bg-slate-700 rounded-xl py-2 text-sm font-bold">Lưu hạn</button>
+          <button id="btnLockToggle" class="px-4 bg-red-600/80 rounded-xl py-2 text-sm font-bold">🔒 Chốt ngay</button>
+        </div>
+        <p id="lockStatus" class="text-xs text-slate-400 mt-1"></p>
+      </div>
+      <div class="mt-4 pt-4 border-t border-slate-700">
+        <h3 class="font-bold text-sm mb-2">🧑‍⚖️ Tài khoản BGK (chống giả tên)</h3>
+        <div class="flex gap-2 flex-wrap">
+          <input id="newJName" placeholder="Tên BGK..." class="flex-1 min-w-[120px] bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-sm outline-none">
+          <input id="newJPass" placeholder="Mật khẩu..." class="w-36 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-sm outline-none">
+          <button id="btnAddJ" class="px-4 bg-amber-500 text-black rounded-xl py-2 text-sm font-bold">+ Thêm</button>
+        </div>
+        <div id="judgeList" class="mt-2 space-y-1 text-sm"></div>
+        <p class="text-xs text-slate-500 mt-1">Chưa tạo TK nào = ai nhập tên cũng chấm được (như cũ). Đã tạo ≥1 TK = BGK phải đăng nhập đúng pass mới chấm được.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Màn hình đăng nhập -->
+<div id="loginOverlay" class="fixed inset-0 z-[100] flex items-center justify-center p-4" style="background:rgba(4,8,31,.88);backdrop-filter:blur(8px)">
+  <div class="w-full max-w-3xl grid md:grid-cols-2 rounded-3xl overflow-hidden ring-1 ring-blue-300/30 shadow-[0_0_80px_rgba(80,120,255,.4)]" style="background:linear-gradient(160deg,rgba(23,38,100,.96),rgba(9,16,52,.98))">
+    <div class="relative hidden md:block min-h-[420px]">
+      <div class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
+        <p class="text-amber-200 tracking-[0.3em] text-[11px] font-bold">🌸 DREAMS OF YOUTH 🌸</p>
+        <h2 class="text-3xl font-extrabold text-white">MỘNG NIÊN HOA</h2>
+      </div>
+      <img src="ảnh nền cuộc thi.jpg" alt="Mộng Niên Hoa" class="absolute inset-0 w-full h-full object-cover" onerror="this.remove()">
+    </div>
+    <div class="p-8">
+      <h2 class="text-2xl font-extrabold text-white">Đăng nhập</h2>
+      <p class="text-blue-200/70 text-sm mb-6">Cuộc thi ảnh Mộng Niên Hoa</p>
+      <label class="text-xs text-slate-400">Tên đăng nhập</label>
+      <input id="loginUser" placeholder="VD: admin / thisinh / tên BGK..." autocomplete="username" class="w-full mt-1 mb-3 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 outline-none focus:border-amber-400">
+      <label class="text-xs text-slate-400">Mật khẩu</label>
+      <input id="loginPass" type="password" placeholder="••••••••" autocomplete="current-password" class="w-full mt-1 mb-2 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 outline-none focus:border-amber-400">
+      <p id="loginErr" class="hidden text-xs text-red-400 mb-2"></p>
+      <button id="btnLogin" class="w-full bg-amber-500 text-black font-bold rounded-xl py-2.5 mt-1">Đăng nhập →</button>
+      <p class="text-center mt-2"><button id="btnForgot" class="text-xs text-slate-500 underline">Quên mật khẩu admin?</button></p>
+      <div class="text-xs text-slate-500 mt-4 leading-relaxed">BGK: tên do BTC cấp • Thí sinh: <b class="text-slate-300">thisinh</b> • Admin: <b class="text-slate-300">admin</b><br>Liên hệ BTC để lấy mật khẩu.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal chấm 3 tiêu chí -->
+<div id="modal" class="hidden fixed inset-0 bg-black/70 p-4 flex items-center justify-center z-50 overflow-y-auto">
+  <div class="bg-slate-800 rounded-2xl max-w-md w-full p-5 my-8">
+    <img id="mImg" class="rounded-xl w-full card-img mb-3">
+    <h3 id="mTitle" class="font-bold"></h3>
+    <p id="mAuthor" class="text-sm text-slate-400 mb-1"></p>
+    <p id="mDesc" class="text-sm text-slate-300 bg-slate-900 rounded-xl p-3 mb-2 italic"></p>
+    <p id="mAvg" class="text-sm text-amber-400 font-bold mb-3"></p>
+    <div class="space-y-3 bg-slate-900 rounded-xl p-3">
+      <div>
+        <div class="flex justify-between text-sm"><span>💡 Ý tưởng & sáng tạo</span><b id="v1" class="text-amber-400">8.0</b></div>
+        <input id="mC1" type="range" min="1" max="10" step="0.5" value="8" class="w-full">
+      </div>
+      <div>
+        <div class="flex justify-between text-sm"><span>💭 Nội dung & thông điệp</span><b id="v2" class="text-amber-400">8.0</b></div>
+        <input id="mC2" type="range" min="1" max="10" step="0.5" value="8" class="w-full">
+      </div>
+      <div>
+        <div class="flex justify-between text-sm"><span>🎨 Hình ảnh & thẩm mỹ</span><b id="v3" class="text-amber-400">8.0</b></div>
+        <input id="mC3" type="range" min="1" max="10" step="0.5" value="8" class="w-full">
+      </div>
+    </div>
+    <div class="text-center mt-3">Tổng của bạn: <b id="scoreVal" class="text-2xl text-amber-400">8.0</b>/10</div>
+    <p id="roNote" class="hidden text-center text-xs text-slate-400 mt-2">🔒 Chế độ xem — bạn không có quyền chấm điểm.</p>
+    <textarea id="mComment" rows="2" placeholder="Nhận xét (không bắt buộc)..." class="w-full mt-2 bg-slate-900 border border-slate-700 rounded-xl p-2 text-sm outline-none"></textarea>
+    <div class="flex gap-2 mt-4">
+      <button id="btnClose" class="flex-1 bg-slate-700 rounded-xl py-2 font-bold">Đóng</button>
+      <button id="btnSubmit" class="flex-1 bg-amber-500 text-black rounded-xl py-2 font-bold">Gửi điểm</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---------- state ----------
+let photos = JSON.parse(localStorage.getItem('pc_photos')||'[]');
+let scores = JSON.parse(localStorage.getItem('pc_scores')||'{}'); // {photoId:{judge:{score,comment,at}}}
+let useFb = false, db = null, showDetail = false, currentId = null;
+const $ = id => document.getElementById(id);
+const esc = s => String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+// TK BGK riêng: {ten: pass} — chống giả tên
+let judges = JSON.parse(localStorage.getItem('pc_judges')||'{}');
+let judgeUser = sessionStorage.getItem('pc_judge_user')||'';
+const hasAccounts = () => Object.keys(judges).length>0;
+const judgeLogged = () => !hasAccounts() || !!judgeUser;
+const judge = () => role==='judge' ? judgeUser : role==='uploader' ? 'Thí sinh' : 'Admin';
+// ponytail: tương thích điểm cũ 1 số (v.score) + điểm mới 3 tiêu chí
+const totalOf = v => (v.c1!=null ? (+v.c1 + +v.c2 + +v.c3)/3 : +v.score||0);
+const avg = id => { const s = Object.values(scores[id]||{}); return s.length ? s.reduce((a,b)=>a+totalOf(b),0)/s.length : 0; };
+const avgC = (id,k) => { const s = Object.values(scores[id]||{}).filter(v=>v[k]!=null); return s.length ? s.reduce((a,b)=>a+ +b[k],0)/s.length : 0; };
+const cnt = id => Object.keys(scores[id]||{}).length;
+const save = () => { try{ localStorage.setItem('pc_photos',JSON.stringify(photos)); localStorage.setItem('pc_scores',JSON.stringify(scores)); }catch(e){ alert('⚠️ Bộ nhớ máy đầy (nhiều ảnh quá)! Hãy kết nối Firebase để lưu online, hoặc xóa bớt ảnh.'); } };
+// (đăng nhập qua màn hình login, không còn nhập tên tự do)
+
+// ---------- phân quyền: admin (thấy ai chấm) / judge (chấm) / uploader (gửi ảnh + xem điểm) ----------
+let role = localStorage.getItem('pc_role')||'judge';
+let adminOK = sessionStorage.getItem('pc_admin')==='1';
+const getPass = () => localStorage.getItem('pc_admin_pass')||'admin123';
+const isAdmin = () => role==='admin' && adminOK;
+// khóa chốt điểm: BGK + thí sinh bị khóa, admin vẫn làm được để sửa sai sót
+let lock = JSON.parse(localStorage.getItem('pc_lock')||'{"deadline":0,"locked":false}');
+const isLocked = () => lock.locked || (lock.deadline && Date.now()>lock.deadline);
+const saveLock = () => { localStorage.setItem('pc_lock',JSON.stringify(lock)); if(useFb) db.ref('settings/lock').set(lock); };
+const canScore = () => (role==='judge' && judgeLogged() && !isLocked()) || isAdmin();
+const canUpload = () => (role==='uploader' && !isLocked()) || isAdmin();
+function gotoTab(t){
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('tab-active', x.dataset.tab===t));
+  ['score','upload','board','setup'].forEach(k=>$('tab-'+k).classList.toggle('hidden', k!==t));
+}
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{
+  const t=b.dataset.tab;
+  if(t==='score' && !canScore()) return alert('Khu vực BGK — vui lòng đăng nhập lại.');
+  if(t==='upload' && !canUpload()) return alert('Quyền BGK chỉ chấm, không đăng ảnh.');
+  if(t==='setup' && !isAdmin()) return alert('Chỉ Admin mới được cài đặt.');
+  gotoTab(t);
+});
+$('btnLogout').onclick = ()=>{
+  role=''; adminOK=false; judgeUser=''; viewerOK=false;
+  sessionStorage.removeItem('pc_admin'); sessionStorage.removeItem('pc_judge_user'); sessionStorage.removeItem('pc_viewer');
+  localStorage.removeItem('pc_role');
+  $('loginUser').value=''; $('loginPass').value='';
+  $('loginOverlay').classList.remove('hidden'); render();
+};
+function applyRole(){
+  $('userName').textContent = role==='judge'?judgeUser:role==='uploader'?'Thí sinh':'Admin';
+  $('userAvatar').textContent = role==='uploader'?'📤':role==='admin'?'👑':'🧑‍⚖️';
+  $('roleBadge').textContent = isAdmin()?'Admin — toàn quyền':role==='judge'?'BGK — chấm điểm':role==='uploader'?'Thí sinh — gửi ảnh + xem điểm':'';
+  renderJudgeList();
+  // Admin luôn thấy chi tiết ai chấm, các quyền khác bị ẩn
+  showDetail = isAdmin();
+  document.querySelectorAll('#tabBar .tab').forEach(b=>{
+    const t=b.dataset.tab;
+    b.style.display = (t==='score'&&!canScore())||(t==='upload'&&!canUpload())||(t==='setup'&&!isAdmin())?'none':'';
+  });
+  $('adminBar').style.display = isAdmin()?'':'none';
+  $('viewerNote').classList.toggle('hidden', isAdmin());
+  // trạng thái chốt điểm
+  const dl = lock.deadline ? new Date(lock.deadline).toLocaleString('vi-VN') : 'chưa đặt';
+  $('lockStatus').textContent = isLocked() ? '🔒 ĐANG KHÓA — BGK/thí sinh không chấm/gửi được nữa.' : '⏳ Đang mở — hạn: '+dl+'.';
+  $('btnLockToggle').textContent = lock.locked ? '🔓 Mở chấm lại' : '🔒 Chốt ngay';
+  if(lock.deadline && isAdmin()){ const d=new Date(lock.deadline); $('lockDeadline').value = new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16); }
+  if(!canScore() && !$('tab-score').classList.contains('hidden')) gotoTab('board');
+  if(!canUpload() && !$('tab-upload').classList.contains('hidden')) gotoTab('board');
+  render();
+}
+$('btnPass').onclick = ()=>{
+  if(!isAdmin()) return;
+  const v=$('newPass').value.trim(); if(!v) return alert('Nhập mật khẩu mới!');
+  localStorage.setItem('pc_admin_pass',v);
+  if(useFb) db.ref('settings/adminPass').set(v);
+  $('newPass').value=''; alert('Đã đổi mật khẩu Admin!');
+};
+// ---------- TK BGK ----------
+const saveJudges = () => { localStorage.setItem('pc_judges',JSON.stringify(judges)); if(useFb) db.ref('settings/judges').set(judges); };
+function renderJudgeList(){
+  $('judgeList').innerHTML = Object.entries(judges).map(([n,p])=>`<div class="flex gap-2 items-center bg-slate-900 rounded-xl px-3 py-1"><span class="flex-1">🧑‍⚖️ ${esc(n)} <span class="text-slate-500">/ ${esc(p)}</span></span><button data-n="${esc(n)}" onclick="delJ(this.dataset.n)" class="text-red-400 text-xs">Xóa</button></div>`).join('')||'<p class="text-xs text-slate-500">Chưa có TK nào.</p>';
+}
+window.delJ = n => { if(!isAdmin()) return; if(!confirm('Xóa TK '+n+'? (điểm cũ giữ nguyên)'))return; delete judges[n]; if(judgeUser===n){judgeUser='';sessionStorage.removeItem('pc_judge_user');} saveJudges(); applyRole(); };
+$('btnAddJ').onclick = ()=>{
+  if(!isAdmin()) return;
+  const n=$('newJName').value.trim(), p=$('newJPass').value.trim();
+  if(!n||!p) return alert('Nhập đủ tên + mật khẩu BGK!');
+  judges[n]=p; $('newJName').value=''; $('newJPass').value=''; saveJudges(); applyRole(); alert('Đã tạo TK BGK: '+n);
+};
+// ---------- đăng nhập: admin (1 TK) / BGK (TK riêng) / thí sinh (1 TK chung: thisinh) ----------
+const getViewerPass = () => localStorage.getItem('pc_viewer_pass')||'thisinh123';
+let viewerOK = sessionStorage.getItem('pc_viewer')==='1';
+function doLogin(){
+  const u=$('loginUser').value.trim(), p=$('loginPass').value, err=$('loginErr');
+  const fail = m => { err.textContent=m; err.classList.remove('hidden'); };
+  if(u==='admin' && p===getPass()){ role='admin'; adminOK=true; sessionStorage.setItem('pc_admin','1'); }
+  else if(judges[u] && judges[u]===p){ role='judge'; judgeUser=u; sessionStorage.setItem('pc_judge_user',u); }
+  else if(u==='thisinh' && p===getViewerPass()){ role='uploader'; viewerOK=true; sessionStorage.setItem('pc_viewer','1'); }
+  else return fail('Sai tên đăng nhập hoặc mật khẩu!');
+  localStorage.setItem('pc_role',role);
+  $('loginPass').value=''; err.classList.add('hidden');
+  $('loginOverlay').classList.add('hidden');
+  applyRole(); gotoTab(role==='judge'?'score':role==='uploader'&&!isLocked()?'upload':'board');
+}
+$('btnLogin').onclick = doLogin;
+$('btnForgot').onclick = ()=>{ if(confirm('Reset mật khẩu admin về mặc định admin123?')){ localStorage.setItem('pc_admin_pass','admin123'); if(useFb&&db) db.ref('settings/adminPass').set('admin123'); alert('Đã reset! Đăng nhập: admin / admin123'); } };
+['loginUser','loginPass'].forEach(i=>$(i).addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); }));
+$('btnLockSave').onclick = ()=>{
+  if(!isAdmin()) return;
+  const v=$('lockDeadline').value;
+  lock.deadline = v ? new Date(v).getTime() : 0;
+  saveLock(); applyRole(); alert(v?'Đã đặt hạn chấm: '+new Date(lock.deadline).toLocaleString('vi-VN'):'Đã xóa hạn chấm.');
+};
+$('btnLockToggle').onclick = ()=>{
+  if(!isAdmin()) return;
+  lock.locked=!lock.locked; saveLock(); applyRole();
+};
+$('btnViewerPass').onclick = ()=>{
+  if(!isAdmin()) return;
+  const v=$('newViewerPass').value.trim(); if(!v) return alert('Nhập mật khẩu mới!');
+  localStorage.setItem('pc_viewer_pass',v);
+  if(useFb) db.ref('settings/viewerPass').set(v);
+  $('newViewerPass').value=''; alert('Đã đổi mật khẩu TK thí sinh!');
+};
+
+// ---------- firebase ----------
+// DÁN CONFIG FIREBASE VÀO ĐÂY trước khi đưa lên GitHub → mọi máy mở link tự kết nối, khỏi nhập tay:
+// const FB_CONFIG = {"apiKey":"...","authDomain":"...","databaseURL":"...","projectId":"...","appId":"..."};
+const FB_CONFIG = {"apiKey":"AIzaSyB1BfLyLmMxXHomSAMrLy6T3NRViFAmy2A","authDomain":"mong-nien-hoa-smc.firebaseapp.com","databaseURL":"https://mong-nien-hoa-smc-default-rtdb.firebaseio.com","projectId":"mong-nien-hoa-smc","storageBucket":"mong-nien-hoa-smc.firebasestorage.app","messagingSenderId":"1078036805932","appId":"1:1078036805932:web:0787665a60d0be98c51489"};
+function connectFb(cfg){
+  try{
+    if(typeof firebase==='undefined'){ $('connBadge').textContent='⚠️ Không có mạng — chạy offline máy này'; return; }
+    if(!firebase.apps.length) firebase.initializeApp(cfg); else firebase.app();
+    db = firebase.database();
+    useFb = true; $('connBadge').textContent='🟢 Đang đồng bộ đa thiết bị (Firebase)'; $('connBadge').className='inline-block mt-3 text-xs px-3 py-1 rounded-full bg-emerald-600';
+    db.ref('photos').on('value', s=>{ photos = s.val()?Object.values(s.val()):[]; render(); });
+    db.ref('scores').on('value', s=>{ scores = s.val()||{}; render(); });
+    db.ref('settings/adminPass').on('value', s=>{ if(s.val()) localStorage.setItem('pc_admin_pass',s.val()); });
+    db.ref('settings/judges').on('value', s=>{ if(s.val()){ judges=s.val(); localStorage.setItem('pc_judges',JSON.stringify(judges)); if(role==='judge'&&judgeUser&&!judges[judgeUser]){ $('btnLogout').click(); return; } applyRole(); } });
+    db.ref('settings/viewerPass').on('value', s=>{ if(s.val()) localStorage.setItem('pc_viewer_pass',s.val()); });
+    db.ref('settings/lock').on('value', s=>{ if(s.val()){ lock=s.val(); localStorage.setItem('pc_lock',JSON.stringify(lock)); applyRole(); } });
+  }catch(e){ alert('Config chưa đúng: '+e.message); }
+}
+const savedCfg = localStorage.getItem('pc_fb') || (FB_CONFIG?JSON.stringify(FB_CONFIG):null);
+if(savedCfg){ $('fbConfig').value = savedCfg; try{ connectFb(JSON.parse(savedCfg)); }catch(e){} }
+$('btnSaveFb').onclick = ()=>{ try{ const c=JSON.parse($('fbConfig').value); localStorage.setItem('pc_fb',$('fbConfig').value); connectFb(c); syncPush(); }catch(e){ alert('Dán đúng JSON config Firebase!'); } };
+$('btnClearFb').onclick = ()=>{ localStorage.removeItem('pc_fb'); location.reload(); };
+function syncPush(){ if(!useFb) return; const o={}; photos.forEach(p=>o[p.id]=p); db.ref('photos').set(o); db.ref('scores').set(scores); db.ref('settings/judges').set(judges); db.ref('settings/viewerPass').set(getViewerPass()); db.ref('settings/adminPass').set(getPass()); db.ref('settings/lock').set(lock); }
+function sync(){ useFb ? syncPush() : save(); }
+// ponytail: ghi từng điểm/ảnh riêng để 2 máy chấm cùng lúc không đè mất nhau
+const fbSet = (path,val) => { if(useFb&&db) db.ref(path).set(val); };
+const fbDel = path => { if(useFb&&db) db.ref(path).remove(); };
+
+// ---------- upload nhiều ảnh + nén + xóa ảnh nhầm trước khi đăng ----------
+let queue = []; // [{src}]
+function renderQueue(){
+  $('upQueue').innerHTML = queue.map((q,i)=>`
+    <div class="relative">
+      <img src="${q.src}" class="w-full h-24 object-cover rounded-xl">
+      <button onclick="delQ(${i})" class="absolute top-1 right-1 w-6 h-6 rounded-full bg-red-600 text-white text-xs font-bold">✕</button>
+    </div>`).join('');
+}
+window.delQ = i => { queue.splice(i,1); renderQueue(); };
+$('upFile').onchange = e=>{
+  [...e.target.files].forEach(f=>{
+    const img = new Image();
+    img.onload = ()=>{
+      const c = document.createElement('canvas');
+      const mx = 1000, r = Math.min(1, mx/Math.max(img.width,img.height));
+      c.width = img.width*r; c.height = img.height*r;
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      queue.push({src:c.toDataURL('image/jpeg',0.75)}); renderQueue();
+    };
+    img.src = URL.createObjectURL(f);
+  });
+  e.target.value='';
+};
+// ---------- render ----------
+function render(){
+  const g = $('photoGrid'); g.innerHTML='';
+  $('emptyMsg').classList.toggle('hidden', photos.length>0);
+  const lb=$('lockBanner');
+  if(isLocked() && !isAdmin()){ lb.classList.remove('hidden'); lb.textContent = lock.locked?'🔒 BTC đã chốt điểm. Cảm ơn BGK!':'🔒 Đã hết hạn chấm điểm ('+new Date(lock.deadline).toLocaleString('vi-VN')+').'; }
+  else lb.classList.add('hidden');
+  photos.forEach(p=>{
+    const my = (scores[p.id]||{})[judge()];
+    const a = avg(p.id), n = cnt(p.id);
+    const el = document.createElement('div');
+    el.className='bg-slate-800 rounded-2xl overflow-hidden';
+    el.innerHTML = `
+      <img src="${p.img}" class="w-full card-img cursor-pointer">
+      <div class="p-4">
+        <div class="font-bold truncate">${esc(p.title)}</div>
+        <div class="text-xs text-slate-400 mb-1">👤 ${esc(p.author)}</div>
+        ${p.desc?`<div class="text-xs text-slate-300 italic mb-2 line-clamp-2">💭 ${esc(p.desc)}</div>`:''}
+        <div class="flex items-center justify-between bg-slate-900 rounded-xl px-3 py-2 mb-3">
+          <span class="text-xs text-slate-400">⭐ Trung bình chung<br><b class="text-amber-400 text-lg">${n?a.toFixed(1):'–'}</b> <span class="text-slate-500">(${n} lượt)</span></span>
+          <span class="text-xs px-2 py-1 rounded-full ${my?'bg-emerald-600':'bg-slate-700'}">${my?'✓ Bạn: '+totalOf(my).toFixed(1):'Chưa chấm'}</span>
+        </div>
+        ${canScore()?`<button class="scoreBtn w-full ${my?'bg-slate-700':'bg-amber-500 text-black'} font-bold rounded-xl py-2">${my?'Sửa điểm':'Chấm điểm'}</button>`:`<div class="text-xs text-center text-slate-500 bg-slate-900 rounded-xl py-2">🔒 ${isLocked()&&!isAdmin()?'Đã chốt điểm':'Chế độ xem điểm'}</div>`}
+      </div>`;
+    el.querySelector('img').onclick = ()=>openModal(p.id);
+    const sb = el.querySelector('.scoreBtn'); if(sb) sb.onclick = ()=>openModal(p.id);
+    g.appendChild(el);
+  });
+  // board
+  const sorted=[...photos].sort((x,y)=>avg(y.id)-avg(x.id)||cnt(y.id)-cnt(x.id));
+  $('boardList').innerHTML = sorted.map((p,i)=>`
+    <div class="bg-slate-800 rounded-2xl p-3 flex gap-3 items-center">
+      <div class="text-2xl font-extrabold w-10 text-center ${i===0?'text-amber-400':''}">${i+1}</div>
+      <img src="${p.img}" class="w-20 h-16 object-cover rounded-xl">
+      <div class="flex-1 min-w-0">
+        <div class="font-bold truncate">${esc(p.title)} <span class="font-normal text-slate-400 text-sm">- ${esc(p.author)}</span></div>
+        ${p.desc?`<div class="text-xs text-slate-400 italic truncate">💭 ${esc(p.desc)}</div>`:''}
+        <div class="text-sm">⭐ <b class="text-amber-400">${cnt(p.id)?avg(p.id).toFixed(2):'–'}</b> <span class="text-slate-500">(${cnt(p.id)} BGK)</span></div>
+        <div class="text-xs text-slate-500">💡 ${cnt(p.id)?avgC(p.id,'c1').toFixed(1):'–'} • 💭 ${cnt(p.id)?avgC(p.id,'c2').toFixed(1):'–'} • 🎨 ${cnt(p.id)?avgC(p.id,'c3').toFixed(1):'–'}</div>
+        ${showDetail?`<div class="text-xs text-slate-400 mt-1">${Object.entries(scores[p.id]||{}).map(([j,v])=>`${esc(j)}: <b class="text-slate-200">${totalOf(v).toFixed(1)}</b> <span class="text-slate-500">(${v.c1??'–'}/${v.c2??'–'}/${v.c3??'–'})</span>${v.comment?' ('+esc(v.comment)+')':''}`).join('<br>')||'Chưa có điểm'}</div>`:''}
+      </div>
+      ${isAdmin()?`<button onclick="delPhoto('${p.id}')" class="text-xs bg-slate-700 px-2 py-1 rounded-lg">Xóa</button>`:''}
+    </div>`).join('') || '<p class="text-center text-slate-500">Chưa có dữ liệu.</p>';
+}
+window.delPhoto = id => { if(!isAdmin()) return alert('Chỉ Admin được xóa!'); if(!confirm('Xóa ảnh này?'))return; photos=photos.filter(p=>p.id!==id); delete scores[id]; save(); fbDel('photos/'+id); fbDel('scores/'+id); render(); };
+
+// ---------- modal chấm 3 tiêu chí (chỉ thấy điểm chung, không thấy điểm người khác) ----------
+function openModal(id){
+  currentId=id; const p=photos.find(x=>x.id===id); if(!p) return;
+  const ro=!canScore(); // thí sinh: mở xem ảnh lớn + ý nghĩa, không chấm được
+  $('mImg').src=p.img; $('mTitle').textContent=p.title; $('mAuthor').textContent='👤 '+p.author;
+  $('mDesc').textContent=p.desc?('💭 '+p.desc):''; $('mDesc').style.display=p.desc?'':'none';
+  const my=(scores[id]||{})[judge()];
+  if(my){ $('mC1').value=my.c1??my.score??8; $('mC2').value=my.c2??my.score??8; $('mC3').value=my.c3??my.score??8; $('mComment').value=my.comment||''; }
+  else { $('mC1').value=8; $('mC2').value=8; $('mC3').value=8; $('mComment').value=''; }
+  ['mC1','mC2','mC3','mComment'].forEach(i=>$(i).disabled=ro);
+  $('btnSubmit').style.display=ro?'none':'';
+  $('roNote').classList.toggle('hidden',!ro);
+  if(ro) $('roNote').textContent = isLocked()&&!isAdmin()?'🔒 Đã hết hạn chấm điểm.':'🔒 Chế độ xem — bạn không có quyền chấm điểm.';
+  updModal(); $('modal').classList.remove('hidden');
+}
+function updModal(){
+  const t=((+$('mC1').value)+(+$('mC2').value)+(+$('mC3').value))/3;
+  $('v1').textContent=(+$('mC1').value).toFixed(1); $('v2').textContent=(+$('mC2').value).toFixed(1); $('v3').textContent=(+$('mC3').value).toFixed(1);
+  $('scoreVal').textContent=t.toFixed(1);
+  const n=cnt(currentId);
+  $('mAvg').textContent = n?`⭐ Điểm chung hiện tại: ${avg(currentId).toFixed(2)} (${n} lượt chấm)`:'Chưa có điểm chung — bạn là người đầu tiên.';
+}
+['mC1','mC2','mC3'].forEach(i=>$(i).oninput=updModal);
+$('btnClose').onclick = ()=>$('modal').classList.add('hidden');
+$('btnSubmit').onclick = ()=>{
+  if(!canScore()) return alert('Quyền xem điểm không được chấm!');
+  scores[currentId]=scores[currentId]||{};
+  const c1=+$('mC1').value, c2=+$('mC2').value, c3=+$('mC3').value;
+  const entry={c1,c2,c3,score:+((c1+c2+c3)/3).toFixed(2), comment:$('mComment').value.trim(), at:Date.now()};
+  scores[currentId][judge()]=entry;
+  save(); fbSet('scores/'+currentId+'/'+judge(), entry);
+  render(); $('modal').classList.add('hidden'); alert('Đã ghi nhận điểm!');
+};
+
+// ---------- board actions ----------
+$('btnToggleDetail').onclick = e=>{ if(!isAdmin()) return; showDetail=!showDetail; e.target.textContent=showDetail?'🙈 Ẩn chi tiết':'👁 Hiện chi tiết ai chấm'; render(); };
+$('btnReset').onclick = ()=>{ if(!isAdmin()) return alert('Chỉ Admin!'); if(!confirm('Xóa TOÀN BỘ ảnh + điểm?'))return; photos=[]; scores={}; sync(); render(); };
+$('btnUpload').onclick = ()=>{
+  if(!canUpload()) return alert(isLocked()?'Đã hết hạn gửi bài!':'Quyền BGK chỉ chấm, không đăng ảnh.');
+  if(!queue.length) return alert('Chọn ít nhất 1 ảnh trước!');
+  if(!$('upTitle').value.trim()) return alert('Nhập tên tác phẩm!');
+  const t=$('upTitle').value.trim(), a=$('upAuthor').value.trim()||'Ẩn danh', d=$('upDesc').value.trim(), now=Date.now();
+  queue.forEach((q,i)=>{
+    const photo={id:'p'+now+'_'+i, title:queue.length>1?`${t} (${i+1})`:t, author:a, desc:d, img:q.src, at:now+i, by:judge()||'?'};
+    photos.unshift(photo); fbSet('photos/'+photo.id, photo);
+  });
+  const n=queue.length; queue=[]; renderQueue();
+  $('upTitle').value=''; $('upAuthor').value=''; $('upDesc').value='';
+  save(); render(); gotoTab(canScore()?'score':'board'); alert(`Đã đăng ${n} ảnh!`);
+};
+const dl = (name,blob) => { const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; a.click(); };
+$('btnBackup').onclick = ()=>{
+  if(!isAdmin()) return alert('Chỉ Admin!');
+  dl('backup-mong-nien-hoa.json', new Blob([JSON.stringify({app:'mong-nien-hoa',exportedAt:new Date().toISOString(),photos,scores,judges,lock})],{type:'application/json'}));
+};
+$('btnRestore').onclick = ()=>{ if(!isAdmin()) return alert('Chỉ Admin!'); $('restoreFile').click(); };
+$('restoreFile').onchange = e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{ try{
+    const d=JSON.parse(r.result);
+    if(!d.photos||!d.scores) return alert('File backup không hợp lệ!');
+    if(!confirm(`Khôi phục backup (${d.photos.length} ảnh, xuất lúc ${d.exportedAt||'?'})? Dữ liệu hiện tại sẽ bị thay thế!`)) return;
+    photos=d.photos; scores=d.scores; if(d.judges) judges=d.judges; if(d.lock) lock=d.lock;
+    save(); saveJudges(); saveLock(); syncPush(); applyRole(); alert('Đã khôi phục!');
+  }catch(err){ alert('File lỗi: '+err.message); } e.target.value=''; };
+  r.readAsText(f);
+};
+$('btnExport').onclick = ()=>{
+  if(!isAdmin()) return alert('Chỉ Admin được xuất file!');
+  const q = s => '"'+String(s??'').replace(/"/g,'""')+'"';
+  let csv='Hang,Tac pham,Tac gia,Y nghia,Diem TB,Y tuong,Noi dung,Tham my,Luot cham\n';
+  [...photos].sort((a,b)=>avg(b.id)-avg(a.id)).forEach((p,i)=>{ csv+=`${i+1},${q(p.title)},${q(p.author)},${q(p.desc)},${cnt(p.id)?avg(p.id).toFixed(2):''},${cnt(p.id)?avgC(p.id,'c1').toFixed(2):''},${cnt(p.id)?avgC(p.id,'c2').toFixed(2):''},${cnt(p.id)?avgC(p.id,'c3').toFixed(2):''},${cnt(p.id)}\n`; });
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob(["\ufeff"+csv],{type:'text/csv'})); a.download='ket-qua-cham-anh.csv'; a.click();
+};
+
+(function init(){
+  adminOK = sessionStorage.getItem('pc_admin')==='1';
+  judgeUser = sessionStorage.getItem('pc_judge_user')||'';
+  viewerOK = sessionStorage.getItem('pc_viewer')==='1';
+  const ok = (role==='admin'&&adminOK)||(role==='judge'&&!!judgeUser)||(role==='uploader'&&viewerOK);
+  if(!ok){ role=''; $('loginOverlay').classList.remove('hidden'); }
+  else $('loginOverlay').classList.add('hidden');
+  applyRole();
+})();
+</script>
+</body>
+</html>
