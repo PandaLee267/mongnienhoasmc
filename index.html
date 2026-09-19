@@ -25,7 +25,7 @@
   #photoGrid img.card-img{transition:transform .5s}
   #photoGrid>div:hover img.card-img{transform:scale(1.06)}
   #photoGrid b.text-amber-400{text-shadow:0 0 14px rgba(251,191,36,.65)}
-  #photoGrid .scoreBtn.bg-amber-500{animation:glowBtn 2.2s ease-in-out infinite}
+  #photoGrid .viewBtn.bg-amber-500{animation:glowBtn 2.2s ease-in-out infinite}
   @keyframes glowBtn{0%,100%{box-shadow:0 0 8px rgba(245,158,11,.4)}50%{box-shadow:0 0 24px rgba(245,158,11,.85)}}
   /* popup chấm */
   #modal{animation:fade .25s ease}
@@ -53,6 +53,25 @@
   button{transition:transform .15s,box-shadow .2s,filter .2s}
   button:active{transform:scale(.97)}
   input:focus,textarea:focus,select:focus{border-color:#fbbf24!important;box-shadow:0 0 0 3px rgba(251,191,36,.15)}
+  /* trình chiếu công bố */
+  .show-row{animation:showIn .6s cubic-bezier(.2,1.2,.4,1)}
+  @keyframes showIn{from{opacity:0;transform:translateY(34px) scale(.9)}}
+  .champ{animation:champGlow 2s ease-in-out infinite}
+  @keyframes champGlow{0%,100%{box-shadow:0 0 18px rgba(245,158,11,.5)}50%{box-shadow:0 0 60px rgba(245,158,11,.95)}}
+  .show-title{text-shadow:0 0 30px rgba(245,158,11,.6);animation:titlePulse 2.4s ease-in-out infinite}
+  @keyframes titlePulse{0%,100%{text-shadow:0 0 22px rgba(245,158,11,.5)}50%{text-shadow:0 0 44px rgba(245,158,11,.95)}}
+  .crown{display:inline-block;animation:crownB 1s ease-in-out infinite}
+  @keyframes crownB{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-6px) rotate(6deg)}}
+  .pod{animation:podUp .7s cubic-bezier(.2,1.2,.4,1) backwards}
+  @keyframes podUp{from{opacity:0;transform:translateY(56px) scale(.9)}}
+  /* thẻ top điểm BGK siêu cute */
+  .cute-card{background:linear-gradient(160deg,#fdf4ff,#e0f2fe 55%,#fef9c3);color:#1e1b4b;border-radius:28px;padding:28px 24px;box-shadow:0 0 60px rgba(244,114,182,.35);position:relative;overflow:hidden}
+  .cute-card::before{content:'✨🌸⭐🌷✨🌸⭐🌷✨';position:absolute;top:10px;left:0;right:0;text-align:center;letter-spacing:8px;opacity:.7;animation:floatX 5s ease-in-out infinite}
+  @keyframes floatX{0%,100%{transform:translateX(-8px)}50%{transform:translateX(8px)}}
+  .cute-row{background:rgba(255,255,255,.75);border:2px solid #fff;border-radius:20px;box-shadow:0 4px 14px rgba(0,0,0,.08)}
+  .cute-score{background:linear-gradient(135deg,#f472b6,#fbbf24);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .cute-chip{display:inline-block;background:#fff;border-radius:99px;padding:1px 8px;font-size:11px;margin:1px;box-shadow:0 1px 4px rgba(0,0,0,.1)}
+  .bounce-slow{display:inline-block;animation:crownB 1.6s ease-in-out infinite}
 </style>
 </head>
 <body class="text-slate-100 min-h-screen">
@@ -93,38 +112,51 @@
     </div>
   </div>
 
-  <!-- SCORE TAB -->
+  <!-- SCORE TAB: lưới các nhóm -->
   <div id="tab-score">
     <p id="lockBanner" class="hidden text-center text-sm bg-red-900/60 border border-red-500/40 rounded-xl px-4 py-2 mb-4">🔒 Đã hết hạn chấm điểm.</p>
+    <p id="progBanner" class="hidden text-center text-sm text-emerald-300 bg-emerald-900/40 border border-emerald-500/30 rounded-xl px-4 py-2 mb-4"></p>
     <div id="photoGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-    <p id="emptyMsg" class="text-center text-slate-500 py-10 hidden">Chưa có ảnh nào. Vào tab <b>Đăng ảnh</b> để tải lên.</p>
+    <p id="emptyMsg" class="text-center text-slate-500 py-10 hidden">Chưa có nhóm nào. Vào tab <b>Đăng ảnh</b> để đăng nhóm dự thi.</p>
+  </div>
+
+  <!-- GROUP TAB: chi tiết 1 nhóm (ảnh + caption, bấm ảnh để zoom) -->
+  <div id="tab-group" class="hidden">
+    <button id="btnBackGroups" class="mb-4 px-4 py-2 rounded-xl bg-slate-700 font-bold text-sm">← Tất cả nhóm</button>
+    <div id="groupDetail"></div>
   </div>
 
   <!-- UPLOAD TAB -->
   <div id="tab-upload" class="hidden">
     <div class="bg-slate-800 rounded-2xl p-5 max-w-xl mx-auto">
-      <h2 class="font-bold text-lg mb-3">📤 Đăng bài dự thi — MỘNG NIÊN HOA</h2>
-      <input id="upTitle" placeholder="Tên tác phẩm" class="w-full mb-2 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 outline-none focus:border-amber-500">
-      <input id="upAuthor" placeholder="Tên tác giả" class="w-full mb-2 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 outline-none focus:border-amber-500">
-      <textarea id="upDesc" rows="3" placeholder="💭 Nội dung / ý nghĩa bức ảnh..." class="w-full mb-2 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 outline-none focus:border-amber-500 text-sm"></textarea>
+      <h2 class="font-bold text-lg mb-3">📤 Đăng nhóm dự thi — MỘNG NIÊN HOA</h2>
+      <input id="upTeam" placeholder="Tên nhóm (VD: Nhóm Sao Mai...)" class="w-full mb-2 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 outline-none focus:border-amber-500">
+      <textarea id="upDesc" rows="3" placeholder="💭 Ý nghĩa chung của nhóm ảnh (không bắt buộc)..." class="w-full mb-2 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 outline-none focus:border-amber-500 text-sm"></textarea>
       <input id="upFile" type="file" accept="image/*" multiple class="w-full mb-3 text-sm text-slate-400">
-      <div id="upQueue" class="grid grid-cols-3 gap-2 mb-3"></div>
-      <button id="btnUpload" class="w-full bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-xl py-3">Đăng ảnh</button>
-      <p class="text-xs text-slate-500 mt-2">Chọn được nhiều ảnh 1 lúc • bấm ✕ để bỏ ảnh nhầm • nhiều ảnh thì tên tự đánh số (1),(2)...</p>
+      <div id="upQueue" class="space-y-2 mb-3"></div>
+      <button id="btnUpload" class="w-full bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-xl py-3">Đăng nhóm</button>
+      <p class="text-xs text-slate-500 mt-2">1 nhóm = nhiều ảnh + caption từng ảnh • bấm ✕ để bỏ ảnh nhầm.</p>
     </div>
   </div>
 
   <!-- BOARD TAB -->
   <div id="tab-board" class="hidden">
+    <div class="text-center mb-4">
+      <p class="text-amber-200 tracking-[0.25em] text-[11px] font-bold">MỘNG NIÊN HOA | DREAMS OF YOUTH</p>
+      <h2 class="show-title text-3xl md:text-4xl font-extrabold text-white">🏆 BẢNG XẾP HẠNG</h2>
+    </div>
     <div class="flex gap-2 mb-4 flex-wrap" id="adminBar">
       <button id="btnExport" class="px-4 py-2 rounded-xl bg-emerald-600 font-bold text-sm">⬇ Xuất CSV</button>
       <button id="btnBackup" class="px-4 py-2 rounded-xl bg-sky-600 font-bold text-sm">💾 Backup JSON</button>
       <button id="btnRestore" class="px-4 py-2 rounded-xl bg-slate-600 font-bold text-sm">📥 Khôi phục</button>
       <input id="restoreFile" type="file" accept="application/json" class="hidden">
+      <button id="btnPublish" class="px-4 py-2 rounded-xl bg-amber-500 text-black font-bold text-sm">📢 Công bố</button>
+      <button id="btnCert" class="px-4 py-2 rounded-xl bg-violet-600 font-bold text-sm">🍭 Thẻ top BGK</button>
       <button id="btnToggleDetail" class="px-4 py-2 rounded-xl bg-slate-700 font-bold text-sm">👁 Hiện chi tiết ai chấm</button>
       <button id="btnReset" class="px-4 py-2 rounded-xl bg-red-600/80 font-bold text-sm">🗑 Xóa toàn bộ</button>
     </div>
     <p id="viewerNote" class="hidden text-xs text-slate-500 mb-3">🔒 Bạn đang ở quyền xem điểm: chỉ thấy điểm trung bình chung, không thấy ai chấm bao nhiêu.</p>
+    <div class="text-center mb-4"><button id="btnShow" class="px-6 py-2.5 rounded-xl bg-amber-500 text-black font-bold" style="box-shadow:0 0 24px rgba(245,158,11,.5)">🎬 Xem công bố kết quả</button></div>
     <div id="boardList" class="space-y-3"></div>
   </div>
 
@@ -157,6 +189,14 @@
         </div>
       </div>
       <div class="mt-4 pt-4 border-t border-slate-700">
+        <h3 class="font-bold text-sm mb-2">📅 Ngày cuộc thi (in trên thẻ top BGK)</h3>
+        <div class="flex gap-2 items-center">
+          <input id="eventDate" type="date" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm outline-none">
+          <button id="btnEventDate" class="px-4 bg-slate-700 rounded-xl py-2 text-sm font-bold">Lưu</button>
+        </div>
+        <p class="text-xs text-slate-500 mt-1">Để trống = tự lấy ngày hôm mở xem.</p>
+      </div>
+      <div class="mt-4 pt-4 border-t border-slate-700">
         <h3 class="font-bold text-sm mb-2">🔒 Chốt điểm / deadline</h3>
         <div class="flex gap-2 flex-wrap items-center">
           <input id="lockDeadline" type="datetime-local" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm outline-none">
@@ -173,7 +213,7 @@
           <button id="btnAddJ" class="px-4 bg-amber-500 text-black rounded-xl py-2 text-sm font-bold">+ Thêm</button>
         </div>
         <div id="judgeList" class="mt-2 space-y-1 text-sm"></div>
-        <p class="text-xs text-slate-500 mt-1">Chưa tạo TK nào = ai nhập tên cũng chấm được (như cũ). Đã tạo ≥1 TK = BGK phải đăng nhập đúng pass mới chấm được.</p>
+        <p class="text-xs text-slate-500 mt-1">BGK bắt buộc có TK do Admin tạo mới đăng nhập được. Xóa TK = thu hồi quyền chấm.</p>
       </div>
     </div>
   </div>
@@ -204,6 +244,48 @@
   </div>
 </div>
 
+<!-- Lightbox: xem + zoom chi tiết từng ảnh -->
+<div id="light" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4" style="background:rgba(2,5,20,.94)">
+  <button id="lightClose" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-slate-700 text-xl z-10">✕</button>
+  <button id="lightPrev" class="absolute left-2 md:left-6 w-10 h-10 rounded-full bg-slate-700/80 text-xl z-10">‹</button>
+  <button id="lightNext" class="absolute right-2 md:right-6 w-10 h-10 rounded-full bg-slate-700/80 text-xl z-10">›</button>
+  <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 items-center bg-slate-800/90 rounded-full px-3 py-1.5 z-10">
+    <button id="lightOut" class="w-8 h-8 rounded-full bg-slate-700 font-bold">−</button>
+    <span id="lightZoom" class="text-xs w-10 text-center">100%</span>
+    <button id="lightIn" class="w-8 h-8 rounded-full bg-slate-700 font-bold">+</button>
+  </div>
+  <div class="text-center max-w-4xl w-full overflow-auto" style="max-height:82vh">
+    <img id="lightImg" class="max-h-[70vh] max-w-full mx-auto rounded-xl object-contain shadow-2xl" style="transition:transform .2s">
+    <p id="lightCap" class="text-sm text-slate-300 italic mt-3"></p>
+    <p id="lightCount" class="text-xs text-slate-500 mt-1"></p>
+  </div>
+</div>
+
+<!-- Trình chiếu công bố kết quả -->
+<div id="resultsShow" class="hidden fixed inset-0 z-[120] overflow-y-auto" style="background:radial-gradient(ellipse at 50% 0%,#1b2a6b 0%,#060d2b 65%)">
+  <canvas id="confetti" class="fixed inset-0 pointer-events-none"></canvas>
+  <div class="min-h-full flex flex-col items-center px-4 py-10 max-w-2xl mx-auto w-full">
+    <p class="text-amber-200 tracking-[0.25em] text-[11px] font-bold">MỘNG NIÊN HOA | DREAMS OF YOUTH</p>
+    <h2 class="show-title text-4xl md:text-5xl font-extrabold text-white mt-1">🏆 KẾT QUẢ</h2>
+    <div id="showStage" class="w-full space-y-3 mt-8"></div>
+    <div class="flex gap-2 mt-8">
+      <button id="btnMute" class="px-4 py-2 rounded-xl bg-slate-700 font-bold text-sm">🔊</button>
+      <button id="btnCloseShow" class="px-6 py-2 rounded-xl bg-slate-700 font-bold text-sm">Đóng</button>
+    </div>
+  </div>
+</div>
+
+<!-- Thẻ top điểm BGK siêu cute (chụp màn hình để khoe) -->
+<div id="certView" class="hidden fixed inset-0 z-[130] overflow-y-auto" style="background:rgba(4,8,31,.92)">
+  <div class="max-w-xl mx-auto px-4 py-8">
+    <div id="certList"></div>
+    <div class="no-print flex gap-2 justify-center mt-4">
+      <button id="btnCloseCert" class="px-6 py-2.5 rounded-xl bg-slate-700 font-bold text-sm">Đóng</button>
+    </div>
+    <p class="no-print text-center text-xs text-slate-500 mt-2">📸 Chụp màn hình thẻ này để đăng khoe kết quả nha!</p>
+  </div>
+</div>
+
 <!-- Modal chấm 3 tiêu chí -->
 <div id="modal" class="hidden fixed inset-0 bg-black/70 p-4 flex items-center justify-center z-50 overflow-y-auto">
   <div class="bg-slate-800 rounded-2xl max-w-md w-full p-5 my-8">
@@ -211,6 +293,7 @@
     <h3 id="mTitle" class="font-bold"></h3>
     <p id="mAuthor" class="text-sm text-slate-400 mb-1"></p>
     <p id="mDesc" class="text-sm text-slate-300 bg-slate-900 rounded-xl p-3 mb-2 italic"></p>
+    <div id="mThumbs" class="flex gap-2 mb-3 overflow-x-auto"></div>
     <p id="mAvg" class="text-sm text-amber-400 font-bold mb-3"></p>
     <div class="space-y-3 bg-slate-900 rounded-xl p-3">
       <div>
@@ -237,24 +320,31 @@
 </div>
 
 <script>
-// ---------- state ----------
-let photos = JSON.parse(localStorage.getItem('pc_photos')||'[]');
-let scores = JSON.parse(localStorage.getItem('pc_scores')||'{}'); // {photoId:{judge:{score,comment,at}}}
-let useFb = false, db = null, showDetail = false, currentId = null;
+// ---------- state: nhóm dự thi {id,team,desc,items:[{img,cap}],at,by} — chấm 1 điểm/nhóm ----------
+const toGroup = p => ({id:p.id, team:p.author||p.team||'Ẩn danh', desc:p.desc||'', items:p.items||[{img:p.img,cap:p.cap||''}], at:p.at||Date.now(), by:p.by||'?'});
+let groups = JSON.parse(localStorage.getItem('pc_groups')||'null');
+if(!groups){ // tự chuyển dữ liệu ảnh lẻ cũ sang nhóm (giữ nguyên id → giữ nguyên điểm đã chấm)
+  const old = JSON.parse(localStorage.getItem('pc_photos')||'[]');
+  groups = old.map(toGroup);
+  localStorage.setItem('pc_groups', JSON.stringify(groups));
+  localStorage.removeItem('pc_photos');
+}
+let scores = JSON.parse(localStorage.getItem('pc_scores')||'{}'); // {groupId:{judge:{c1,c2,c3,score,comment,at}}}
+let useFb = false, db = null, showDetail = false, currentId = null, boardAnimated = false;
 const $ = id => document.getElementById(id);
 const esc = s => String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 // TK BGK riêng: {ten: pass} — chống giả tên
 let judges = JSON.parse(localStorage.getItem('pc_judges')||'{}');
 let judgeUser = sessionStorage.getItem('pc_judge_user')||'';
 const hasAccounts = () => Object.keys(judges).length>0;
-const judgeLogged = () => !hasAccounts() || !!judgeUser;
+const judgeLogged = () => !!judgeUser && !!judges[judgeUser]; // BGK bắt buộc có TK do admin cấp
 const judge = () => role==='judge' ? judgeUser : role==='uploader' ? 'Thí sinh' : 'Admin';
 // ponytail: tương thích điểm cũ 1 số (v.score) + điểm mới 3 tiêu chí
 const totalOf = v => (v.c1!=null ? (+v.c1 + +v.c2 + +v.c3)/3 : +v.score||0);
 const avg = id => { const s = Object.values(scores[id]||{}); return s.length ? s.reduce((a,b)=>a+totalOf(b),0)/s.length : 0; };
 const avgC = (id,k) => { const s = Object.values(scores[id]||{}).filter(v=>v[k]!=null); return s.length ? s.reduce((a,b)=>a+ +b[k],0)/s.length : 0; };
 const cnt = id => Object.keys(scores[id]||{}).length;
-const save = () => { try{ localStorage.setItem('pc_photos',JSON.stringify(photos)); localStorage.setItem('pc_scores',JSON.stringify(scores)); }catch(e){ alert('⚠️ Bộ nhớ máy đầy (nhiều ảnh quá)! Hãy kết nối Firebase để lưu online, hoặc xóa bớt ảnh.'); } };
+const save = () => { try{ localStorage.setItem('pc_groups',JSON.stringify(groups)); localStorage.setItem('pc_scores',JSON.stringify(scores)); }catch(e){ alert('⚠️ Bộ nhớ máy đầy (nhiều ảnh quá)! Hãy kết nối Firebase để lưu online, hoặc xóa bớt ảnh.'); } };
 // (đăng nhập qua màn hình login, không còn nhập tên tự do)
 
 // ---------- phân quyền: admin (thấy ai chấm) / judge (chấm) / uploader (gửi ảnh + xem điểm) ----------
@@ -268,10 +358,67 @@ const isLocked = () => lock.locked || (lock.deadline && Date.now()>lock.deadline
 const saveLock = () => { localStorage.setItem('pc_lock',JSON.stringify(lock)); if(useFb) db.ref('settings/lock').set(lock); };
 const canScore = () => (role==='judge' && judgeLogged() && !isLocked()) || isAdmin();
 const canUpload = () => (role==='uploader' && !isLocked()) || isAdmin();
+// công bố kết quả: admin bấm mới hiện bảng xếp hạng cho mọi người
+let published = localStorage.getItem('pc_published')!=='0';
+const savePublished = () => { localStorage.setItem('pc_published',published?'1':'0'); if(useFb) db.ref('settings/published').set(published); };
+// ngày cuộc thi: để trống = ngày hôm mở xem
+let eventDate = localStorage.getItem('pc_event_date')||'';
+const showDate = () => eventDate ? new Date(eventDate+'T00:00').toLocaleDateString('vi-VN') : new Date().toLocaleDateString('vi-VN');
+const saveEventDate = () => { localStorage.setItem('pc_event_date',eventDate); if(useFb) db.ref('settings/eventDate').set(eventDate); };
 function gotoTab(t){
   document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('tab-active', x.dataset.tab===t));
-  ['score','upload','board','setup'].forEach(k=>$('tab-'+k).classList.toggle('hidden', k!==t));
+  ['score','upload','board','setup','group'].forEach(k=>$('tab-'+k).classList.toggle('hidden', k!==t));
 }
+$('btnBackGroups').onclick = ()=>gotoTab(canScore()?'score':'board');
+// ---------- chi tiết nhóm: xem ảnh + caption, bấm ảnh để zoom, chấm 1 điểm/nhóm ----------
+let groupId=null;
+function openGroup(id){
+  groupId=id; const gd=groups.find(x=>x.id===id); if(!gd) return;
+  const my=(scores[id]||{})[judge()], a=avg(id), n=cnt(id);
+  $('groupDetail').innerHTML=`
+    <div class="bg-slate-800 rounded-2xl p-5 mb-4">
+      <div class="flex flex-col md:flex-row md:items-center gap-3 justify-between">
+        <div class="min-w-0">
+          <h2 class="text-2xl font-extrabold">👥 ${esc(gd.team)}</h2>
+          ${gd.desc?`<p class="text-sm text-slate-300 italic mt-1">💭 ${esc(gd.desc)}</p>`:''}
+          <p class="text-xs text-slate-500 mt-1">📷 ${gd.items.length} ảnh • ⭐ Trung bình chung: <b class="text-amber-400">${n?a.toFixed(2):'–'}</b> (${n} lượt chấm)</p>
+        </div>
+        ${canScore()?`<button onclick="openModal('${id}')" class="px-6 py-3 rounded-xl bg-amber-500 text-black font-bold shrink-0">${my?'✏️ Sửa điểm ('+totalOf(my).toFixed(1)+')':'⭐ Chấm nhóm này'}</button>`:`<span class="text-xs text-slate-500 shrink-0">🔒 ${isLocked()&&!isAdmin()?'Đã chốt điểm':'Chế độ xem điểm'}</span>`}
+      </div>
+    </div>
+    <div class="grid sm:grid-cols-2 gap-4">
+      ${gd.items.map((it,i)=>`
+        <div class="bg-slate-800 rounded-2xl overflow-hidden">
+          <img src="${it.img}" data-i="${i}" class="gimg w-full card-img cursor-zoom-in">
+          ${it.cap?`<p class="text-sm text-slate-300 italic p-3">💬 ${esc(it.cap)}</p>`:`<p class="text-xs text-slate-600 p-3">Ảnh ${i+1}</p>`}
+        </div>`).join('')}
+    </div>`;
+  $('groupDetail').querySelectorAll('.gimg').forEach(im=>im.onclick=()=>openLight(gd.items,+im.dataset.i));
+  gotoTab('group');
+}
+// ---------- lightbox zoom xem chi tiết từng ảnh ----------
+let lightItems=[], lightIdx=0, lightZoom=1;
+function openLight(items,idx){ lightItems=items; lightIdx=idx; lightZoom=1; updLight(); $('light').classList.remove('hidden'); }
+function updLight(){
+  const it=lightItems[lightIdx]; if(!it) return;
+  $('lightImg').src=it.img; $('lightImg').style.transform=`scale(${lightZoom})`;
+  $('lightCap').textContent=it.cap?('💬 '+it.cap):'';
+  $('lightCount').textContent=`Ảnh ${lightIdx+1} / ${lightItems.length}`;
+  $('lightZoom').textContent=Math.round(lightZoom*100)+'%';
+}
+const zstep = d => { lightZoom=Math.min(4,Math.max(1,+(lightZoom+d).toFixed(1))); updLight(); };
+$('lightIn').onclick=()=>zstep(.5); $('lightOut').onclick=()=>zstep(-.5);
+$('lightImg').ondblclick=()=>{ lightZoom=lightZoom===1?2.5:1; updLight(); };
+$('lightPrev').onclick=e=>{ e.stopPropagation(); lightIdx=(lightIdx-1+lightItems.length)%lightItems.length; lightZoom=1; updLight(); };
+$('lightNext').onclick=e=>{ e.stopPropagation(); lightIdx=(lightIdx+1)%lightItems.length; lightZoom=1; updLight(); };
+$('lightClose').onclick=()=>$('light').classList.add('hidden');
+$('light').onclick=e=>{ if(e.target.id==='light'||e.target.id==='lightCap') $('light').classList.add('hidden'); };
+document.addEventListener('keydown',e=>{
+  if($('light').classList.contains('hidden')) return;
+  if(e.key==='Escape') $('light').classList.add('hidden');
+  if(e.key==='ArrowLeft') $('lightPrev').click();
+  if(e.key==='ArrowRight') $('lightNext').click();
+});
 document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{
   const t=b.dataset.tab;
   if(t==='score' && !canScore()) return alert('Khu vực BGK — vui lòng đăng nhập lại.');
@@ -298,12 +445,15 @@ function applyRole(){
     b.style.display = (t==='score'&&!canScore())||(t==='upload'&&!canUpload())||(t==='setup'&&!isAdmin())?'none':'';
   });
   $('adminBar').style.display = isAdmin()?'':'none';
+  $('btnShow').style.display = (published||isAdmin())?'':'none';
   $('viewerNote').classList.toggle('hidden', isAdmin());
   // trạng thái chốt điểm
   const dl = lock.deadline ? new Date(lock.deadline).toLocaleString('vi-VN') : 'chưa đặt';
   $('lockStatus').textContent = isLocked() ? '🔒 ĐANG KHÓA — BGK/thí sinh không chấm/gửi được nữa.' : '⏳ Đang mở — hạn: '+dl+'.';
   $('btnLockToggle').textContent = lock.locked ? '🔓 Mở chấm lại' : '🔒 Chốt ngay';
+  $('btnPublish').textContent = published ? '🙈 Ẩn kết quả' : '📢 Công bố';
   if(lock.deadline && isAdmin()){ const d=new Date(lock.deadline); $('lockDeadline').value = new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16); }
+  if(isAdmin()) $('eventDate').value = eventDate;
   if(!canScore() && !$('tab-score').classList.contains('hidden')) gotoTab('board');
   if(!canUpload() && !$('tab-upload').classList.contains('hidden')) gotoTab('board');
   render();
@@ -327,7 +477,7 @@ $('btnAddJ').onclick = ()=>{
   if(!n||!p) return alert('Nhập đủ tên + mật khẩu BGK!');
   judges[n]=p; $('newJName').value=''; $('newJPass').value=''; saveJudges(); applyRole(); alert('Đã tạo TK BGK: '+n);
 };
-// ---------- đăng nhập: admin (1 TK) / BGK (TK riêng) / thí sinh (1 TK chung: thisinh) ----------
+// ---------- đăng nhập: admin (1 TK) / BGK (TK riêng) / thí sinh (1 TK chung: smcsaodo) ----------
 const getViewerPass = () => localStorage.getItem('pc_viewer_pass')||'smcsaodo';
 let viewerOK = sessionStorage.getItem('pc_viewer')==='1';
 function doLogin(){
@@ -336,7 +486,7 @@ function doLogin(){
   if(u==='admin' && p===getPass()){ role='admin'; adminOK=true; sessionStorage.setItem('pc_admin','1'); }
   else if(judges[u] && judges[u]===p){ role='judge'; judgeUser=u; sessionStorage.setItem('pc_judge_user',u); }
   else if(u==='smcsaodo' && p===getViewerPass()){ role='uploader'; viewerOK=true; sessionStorage.setItem('pc_viewer','1'); }
-  else return fail('Sai tên đăng nhập hoặc mật khẩu!');
+  else return fail('Sai tên đăng nhập hoặc mật khẩu! Liên hệ BTC để được cấp tài khoản.');
   localStorage.setItem('pc_role',role);
   $('loginPass').value=''; err.classList.add('hidden');
   $('loginOverlay').classList.add('hidden');
@@ -354,6 +504,10 @@ $('btnLockSave').onclick = ()=>{
 $('btnLockToggle').onclick = ()=>{
   if(!isAdmin()) return;
   lock.locked=!lock.locked; saveLock(); applyRole();
+};
+$('btnEventDate').onclick = ()=>{
+  if(!isAdmin()) return;
+  eventDate=$('eventDate').value; saveEventDate(); alert(eventDate?'Đã đặt ngày cuộc thi: '+showDate():'Đã về chế độ ngày tự động.');
 };
 $('btnViewerPass').onclick = ()=>{
   if(!isAdmin()) return;
@@ -373,43 +527,60 @@ function connectFb(cfg){
     if(!firebase.apps.length) firebase.initializeApp(cfg); else firebase.app();
     db = firebase.database();
     useFb = true; $('connBadge').textContent='🟢 Đang đồng bộ đa thiết bị (Firebase)'; $('connBadge').className='inline-block mt-3 text-xs px-3 py-1 rounded-full bg-emerald-600';
-    db.ref('photos').on('value', s=>{ photos = s.val()?Object.values(s.val()):[]; render(); });
+    let migrated=false;
+    db.ref('groups').on('value', s=>{
+      const v=s.val();
+      if(v){ groups=Object.values(v); render(); }
+      else if(!migrated){ migrated=true; // chuyển kho ảnh lẻ cũ sang nhóm 1 lần duy nhất
+        db.ref('photos').once('value').then(ps=>{
+          const pv=ps.val(); if(!pv) return;
+          groups=Object.values(pv).map(toGroup);
+          const o={}; groups.forEach(g=>o[g.id]=g);
+          db.ref('groups').set(o); db.ref('photos').remove(); render();
+        });
+      }
+    });
     db.ref('scores').on('value', s=>{ scores = s.val()||{}; render(); });
     db.ref('settings/adminPass').on('value', s=>{ if(s.val()) localStorage.setItem('pc_admin_pass',s.val()); });
     db.ref('settings/judges').on('value', s=>{ if(s.val()){ judges=s.val(); localStorage.setItem('pc_judges',JSON.stringify(judges)); if(role==='judge'&&judgeUser&&!judges[judgeUser]){ $('btnLogout').click(); return; } applyRole(); } });
     db.ref('settings/viewerPass').on('value', s=>{ if(s.val()) localStorage.setItem('pc_viewer_pass',s.val()); });
     db.ref('settings/lock').on('value', s=>{ if(s.val()){ lock=s.val(); localStorage.setItem('pc_lock',JSON.stringify(lock)); applyRole(); } });
+    db.ref('settings/published').on('value', s=>{ if(s.val()!=null){ published=!!s.val(); localStorage.setItem('pc_published',published?'1':'0'); applyRole(); } });
+    db.ref('settings/eventDate').on('value', s=>{ if(s.val()!=null){ eventDate=s.val()||''; localStorage.setItem('pc_event_date',eventDate); } });
   }catch(e){ alert('Config chưa đúng: '+e.message); }
 }
-const savedCfg = localStorage.getItem('pc_fb') || (FB_CONFIG?JSON.stringify(FB_CONFIG):null);
+const fbOff = localStorage.getItem('pc_fb_off')==='1';
+const savedCfg = (!fbOff && (localStorage.getItem('pc_fb') || (FB_CONFIG?JSON.stringify(FB_CONFIG):null)));
 if(savedCfg){ $('fbConfig').value = savedCfg; try{ connectFb(JSON.parse(savedCfg)); }catch(e){} }
-$('btnSaveFb').onclick = ()=>{ try{ const c=JSON.parse($('fbConfig').value); localStorage.setItem('pc_fb',$('fbConfig').value); connectFb(c); syncPush(); }catch(e){ alert('Dán đúng JSON config Firebase!'); } };
-$('btnClearFb').onclick = ()=>{ localStorage.removeItem('pc_fb'); location.reload(); };
-function syncPush(){ if(!useFb) return; const o={}; photos.forEach(p=>o[p.id]=p); db.ref('photos').set(o); db.ref('scores').set(scores); db.ref('settings/judges').set(judges); db.ref('settings/viewerPass').set(getViewerPass()); db.ref('settings/adminPass').set(getPass()); db.ref('settings/lock').set(lock); }
+$('btnSaveFb').onclick = ()=>{ try{ const c=JSON.parse($('fbConfig').value); localStorage.setItem('pc_fb',$('fbConfig').value); localStorage.removeItem('pc_fb_off'); connectFb(c); syncPush(); }catch(e){ alert('Dán đúng JSON config Firebase!'); } };
+$('btnClearFb').onclick = ()=>{ localStorage.removeItem('pc_fb'); localStorage.setItem('pc_fb_off','1'); location.reload(); };
+function syncPush(){ if(!useFb) return; const o={}; groups.forEach(g=>o[g.id]=g); db.ref('groups').set(o); db.ref('scores').set(scores); db.ref('settings/judges').set(judges); db.ref('settings/viewerPass').set(getViewerPass()); db.ref('settings/adminPass').set(getPass()); db.ref('settings/lock').set(lock); db.ref('settings/published').set(published); db.ref('settings/eventDate').set(eventDate); }
 function sync(){ useFb ? syncPush() : save(); }
 // ponytail: ghi từng điểm/ảnh riêng để 2 máy chấm cùng lúc không đè mất nhau
 const fbSet = (path,val) => { if(useFb&&db) db.ref(path).set(val); };
 const fbDel = path => { if(useFb&&db) db.ref(path).remove(); };
 
-// ---------- upload nhiều ảnh + nén + xóa ảnh nhầm trước khi đăng ----------
-let queue = []; // [{src}]
+// ---------- upload nhóm: nhiều ảnh + caption từng ảnh + xóa ảnh nhầm ----------
+let queue = []; // [{src,cap}]
 function renderQueue(){
   $('upQueue').innerHTML = queue.map((q,i)=>`
-    <div class="relative">
-      <img src="${q.src}" class="w-full h-24 object-cover rounded-xl">
-      <button onclick="delQ(${i})" class="absolute top-1 right-1 w-6 h-6 rounded-full bg-red-600 text-white text-xs font-bold">✕</button>
+    <div class="flex gap-2 items-center bg-slate-900 rounded-xl p-2">
+      <img src="${q.src}" class="w-16 h-16 object-cover rounded-lg shrink-0">
+      <input value="${esc(q.cap)}" oninput="capQ(${i},this.value)" placeholder="Caption ảnh ${i+1} (không bắt buộc)..." class="flex-1 min-w-0 bg-transparent text-sm outline-none placeholder:text-slate-500">
+      <button onclick="delQ(${i})" class="w-7 h-7 rounded-full bg-red-600 text-white text-xs font-bold shrink-0">✕</button>
     </div>`).join('');
 }
 window.delQ = i => { queue.splice(i,1); renderQueue(); };
+window.capQ = (i,v) => { queue[i].cap = v; };
 $('upFile').onchange = e=>{
   [...e.target.files].forEach(f=>{
     const img = new Image();
     img.onload = ()=>{
       const c = document.createElement('canvas');
-      const mx = 1000, r = Math.min(1, mx/Math.max(img.width,img.height));
+      const mx = 1600, r = Math.min(1, mx/Math.max(img.width,img.height));
       c.width = img.width*r; c.height = img.height*r;
       c.getContext('2d').drawImage(img,0,0,c.width,c.height);
-      queue.push({src:c.toDataURL('image/jpeg',0.75)}); renderQueue();
+      queue.push({src:c.toDataURL('image/jpeg',0.85),cap:''}); renderQueue();
     };
     img.src = URL.createObjectURL(f);
   });
@@ -418,55 +589,94 @@ $('upFile').onchange = e=>{
 // ---------- render ----------
 function render(){
   const g = $('photoGrid'); g.innerHTML='';
-  $('emptyMsg').classList.toggle('hidden', photos.length>0);
+  $('emptyMsg').classList.toggle('hidden', groups.length>0);
   const lb=$('lockBanner');
   if(isLocked() && !isAdmin()){ lb.classList.remove('hidden'); lb.textContent = lock.locked?'🔒 BTC đã chốt điểm. Cảm ơn BGK!':'🔒 Đã hết hạn chấm điểm ('+new Date(lock.deadline).toLocaleString('vi-VN')+').'; }
   else lb.classList.add('hidden');
-  photos.forEach(p=>{
-    const my = (scores[p.id]||{})[judge()];
-    const a = avg(p.id), n = cnt(p.id);
+  const pb=$('progBanner');
+  if(role==='judge'&&judgeUser){ const done=groups.filter(g=>(scores[g.id]||{})[judgeUser]).length; pb.classList.remove('hidden'); pb.textContent=`✅ Bạn đã chấm ${done}/${groups.length} nhóm`+(done===groups.length&&groups.length?' — xong hết rồi, cảm ơn BGK!':''); }
+  else pb.classList.add('hidden');
+  groups.forEach(gd=>{
+    const my = (scores[gd.id]||{})[judge()];
+    const a = avg(gd.id), n = cnt(gd.id);
+    const cover = (gd.items[0]||{}).img||'';
     const el = document.createElement('div');
     el.className='bg-slate-800 rounded-2xl overflow-hidden';
     el.innerHTML = `
-      <img src="${p.img}" class="w-full card-img cursor-pointer">
+      <div class="relative">
+        <img src="${cover}" class="w-full card-img cursor-pointer">
+        <span class="absolute bottom-2 right-2 text-xs bg-black/70 px-2 py-1 rounded-full">📷 ${gd.items.length} ảnh</span>
+      </div>
       <div class="p-4">
-        <div class="font-bold truncate">${esc(p.title)}</div>
-        <div class="text-xs text-slate-400 mb-1">👤 ${esc(p.author)}</div>
-        ${p.desc?`<div class="text-xs text-slate-300 italic mb-2 line-clamp-2">💭 ${esc(p.desc)}</div>`:''}
+        <div class="font-bold truncate">👥 ${esc(gd.team)}</div>
+        ${gd.desc?`<div class="text-xs text-slate-300 italic mb-2 line-clamp-2">💭 ${esc(gd.desc)}</div>`:''}
         <div class="flex items-center justify-between bg-slate-900 rounded-xl px-3 py-2 mb-3">
           <span class="text-xs text-slate-400">⭐ Trung bình chung<br><b class="text-amber-400 text-lg">${n?a.toFixed(1):'–'}</b> <span class="text-slate-500">(${n} lượt)</span></span>
           <span class="text-xs px-2 py-1 rounded-full ${my?'bg-emerald-600':'bg-slate-700'}">${my?'✓ Bạn: '+totalOf(my).toFixed(1):'Chưa chấm'}</span>
         </div>
-        ${canScore()?`<button class="scoreBtn w-full ${my?'bg-slate-700':'bg-amber-500 text-black'} font-bold rounded-xl py-2">${my?'Sửa điểm':'Chấm điểm'}</button>`:`<div class="text-xs text-center text-slate-500 bg-slate-900 rounded-xl py-2">🔒 ${isLocked()&&!isAdmin()?'Đã chốt điểm':'Chế độ xem điểm'}</div>`}
+        <button class="viewBtn w-full ${my?'bg-slate-700':'bg-amber-500 text-black'} font-bold rounded-xl py-2">Xem nhóm + chấm →</button>
       </div>`;
-    el.querySelector('img').onclick = ()=>openModal(p.id);
-    const sb = el.querySelector('.scoreBtn'); if(sb) sb.onclick = ()=>openModal(p.id);
+    el.querySelector('img').onclick = ()=>openGroup(gd.id);
+    el.querySelector('.viewBtn').onclick = ()=>openGroup(gd.id);
     g.appendChild(el);
   });
-  // board
-  const sorted=[...photos].sort((x,y)=>avg(y.id)-avg(x.id)||cnt(y.id)-cnt(x.id));
-  $('boardList').innerHTML = sorted.map((p,i)=>`
-    <div class="bg-slate-800 rounded-2xl p-3 flex gap-3 items-center">
-      <div class="text-2xl font-extrabold w-10 text-center ${i===0?'text-amber-400':''}">${i+1}</div>
-      <img src="${p.img}" class="w-20 h-16 object-cover rounded-xl">
+  if(groupId && !$('tab-group').classList.contains('hidden')) openGroup(groupId); // điểm chung tự tươi khi máy khác chấm
+  // board: podium 2-1-3 + bảng hạng 4+
+  const sorted=[...groups].sort((x,y)=>avg(y.id)-avg(x.id)||cnt(y.id)-cnt(x.id));
+  if(!published && !isAdmin()){ $('boardList').innerHTML='<p class="text-center text-slate-400 py-10">📢 Kết quả chưa được BTC công bố.<br><span class="text-xs text-slate-500">Quay lại sau khi BGK chấm xong nhé!</span></p>'; return; }
+  if(!sorted.length){ $('boardList').innerHTML='<p class="text-center text-slate-500 py-10">🏆 Chưa có nhóm dự thi nào.</p>'; return; }
+  const medal=['🥇','🥈','🥉'];
+  const ringC=['ring-amber-400/70','ring-slate-300/50','ring-orange-400/50'];
+  const bar=(v,c)=>`<div class="flex-1 h-1.5 rounded-full bg-slate-700/70 overflow-hidden"><div class="h-full rounded-full" style="width:${(Math.max(0,v)/10*100).toFixed(0)}%;background:${c}"></div></div>`;
+  const scored=sorted.filter(g=>cnt(g.id)>0);
+  const top=[...scored].sort((x,y)=>avg(y.id)-avg(x.id)).slice(0,3);
+  const podIds=new Set(top.map(g=>g.id));
+  const anim=boardAnimated?'':'pod';
+  let podium='';
+  if(top.length){
+    const stepH=['','h-14 md:h-16','h-10 md:h-12'];
+    const stepBg=['','linear-gradient(180deg,#e2e8f0,#64748b)','linear-gradient(180deg,#fdba74,#9a3412)'];
+    const order=[1,0,2].filter(k=>top[k]);
+    podium=`<div class="flex items-end justify-center gap-2 md:gap-5 mb-2">`+order.map(k=>{
+      const g=top[k], big=k===0;
+      return `<div class="${anim} text-center ${big?'w-[44%]':'w-[28%]'} cursor-pointer" style="animation-delay:${k===0?250:k===1?0:450}ms" onclick="openGroup('${g.id}')">
+        <div class="text-3xl md:text-4xl mb-1">${big?'<span class="crown">👑</span><br>':''}${medal[k]}</div>
+        <img src="${(g.items[0]||{}).img||''}" class="w-full ${big?'h-32 md:h-48':'h-20 md:h-28'} object-cover rounded-2xl ring-2 ${ringC[k]} ${big?'shadow-[0_0_40px_rgba(245,158,11,.45)]':''}">
+        <div class="font-bold truncate mt-1 ${big?'text-base md:text-lg':'text-xs md:text-sm'}">👥 ${esc(g.team)}</div>
+        <div class="text-amber-400 font-extrabold ${big?'text-3xl md:text-4xl':'text-xl'}">⭐ ${avg(g.id).toFixed(2)}</div>
+        <div class="text-[11px] text-slate-500">${cnt(g.id)} BGK • ${g.items.length} ảnh</div>
+        ${big?'':`<div class="${stepH[k]} rounded-t-xl mt-1 flex items-start justify-center pt-1 text-xl font-extrabold text-slate-900/60" style="background:${stepBg[k]}">${k+1}</div>`}
+      </div>`;}).join('')+`</div>`
+      +(top[0]?`<div class="mx-auto w-[44%] h-20 md:h-24 rounded-t-xl flex items-start justify-center pt-1 text-2xl font-extrabold text-amber-950/70" style="background:linear-gradient(180deg,#fde68a,#b45309)">1</div>`:'');
+  }
+  const rest=sorted.filter(g=>!podIds.has(g.id));
+  const rows=rest.length?`<p class="text-center text-[11px] text-slate-500 mt-4 mb-2"><span style="color:#fbbf24">●</span> 💡 Ý tưởng &nbsp;<span style="color:#60a5fa">●</span> 💭 Nội dung &nbsp;<span style="color:#f472b6">●</span> 🎨 Thẩm mỹ</p><div class="space-y-2">`+rest.map(g=>{
+    const i=sorted.indexOf(g);
+    return `
+    <div class="bg-slate-800 rounded-2xl p-3 flex gap-3 items-center cursor-pointer" onclick="openGroup('${g.id}')">
+      <div class="w-9 h-9 rounded-full flex items-center justify-center font-extrabold shrink-0" style="background:linear-gradient(135deg,#24348f,#0a1445);border:1px solid rgba(147,197,253,.45)">${i+1}</div>
+      <img src="${(g.items[0]||{}).img||''}" class="w-16 h-14 object-cover rounded-xl shrink-0">
       <div class="flex-1 min-w-0">
-        <div class="font-bold truncate">${esc(p.title)} <span class="font-normal text-slate-400 text-sm">- ${esc(p.author)}</span></div>
-        ${p.desc?`<div class="text-xs text-slate-400 italic truncate">💭 ${esc(p.desc)}</div>`:''}
-        <div class="text-sm">⭐ <b class="text-amber-400">${cnt(p.id)?avg(p.id).toFixed(2):'–'}</b> <span class="text-slate-500">(${cnt(p.id)} BGK)</span></div>
-        <div class="text-xs text-slate-500">💡 ${cnt(p.id)?avgC(p.id,'c1').toFixed(1):'–'} • 💭 ${cnt(p.id)?avgC(p.id,'c2').toFixed(1):'–'} • 🎨 ${cnt(p.id)?avgC(p.id,'c3').toFixed(1):'–'}</div>
-        ${showDetail?`<div class="text-xs text-slate-400 mt-1">${Object.entries(scores[p.id]||{}).map(([j,v])=>`${esc(j)}: <b class="text-slate-200">${totalOf(v).toFixed(1)}</b> <span class="text-slate-500">(${v.c1??'–'}/${v.c2??'–'}/${v.c3??'–'})</span>${v.comment?' ('+esc(v.comment)+')':''}`).join('<br>')||'Chưa có điểm'}</div>`:''}
+        <div class="font-bold text-sm truncate">👥 ${esc(g.team)} <span class="font-normal text-slate-500 text-[11px]">(${g.items.length} ảnh)</span></div>
+        <div class="flex gap-1 mt-1.5">${bar(avgC(g.id,'c1'),'#fbbf24')}${bar(avgC(g.id,'c2'),'#60a5fa')}${bar(avgC(g.id,'c3'),'#f472b6')}</div>
+        ${showDetail?`<div class="text-xs text-slate-400 mt-1">${Object.entries(scores[g.id]||{}).map(([j,v])=>`${esc(j)}: <b class="text-slate-200">${totalOf(v).toFixed(1)}</b> <span class="text-slate-500">(${v.c1??'–'}/${v.c2??'–'}/${v.c3??'–'})</span>${v.comment?' ('+esc(v.comment)+')':''}`).join('<br>')||'Chưa có điểm'}</div>`:''}
       </div>
-      ${isAdmin()?`<button onclick="delPhoto('${p.id}')" class="text-xs bg-slate-700 px-2 py-1 rounded-lg">Xóa</button>`:''}
-    </div>`).join('') || '<p class="text-center text-slate-500">Chưa có dữ liệu.</p>';
+      <div class="text-right shrink-0"><div class="text-amber-400 font-extrabold text-xl">⭐ ${cnt(g.id)?avg(g.id).toFixed(2):'–'}</div><div class="text-[10px] text-slate-500">${cnt(g.id)} BGK</div></div>
+      ${isAdmin()?`<button onclick="event.stopPropagation();delGroup('${g.id}')" class="text-xs bg-slate-700 px-2 py-1 rounded-lg shrink-0">Xóa</button>`:''}
+    </div>`;}).join('')+`</div>`:'';
+  $('boardList').innerHTML = podium+rows;
+  boardAnimated=true;
 }
-window.delPhoto = id => { if(!isAdmin()) return alert('Chỉ Admin được xóa!'); if(!confirm('Xóa ảnh này?'))return; photos=photos.filter(p=>p.id!==id); delete scores[id]; save(); fbDel('photos/'+id); fbDel('scores/'+id); render(); };
+window.delGroup = id => { if(!isAdmin()) return alert('Chỉ Admin được xóa!'); if(!confirm('Xóa cả nhóm này?'))return; groups=groups.filter(g=>g.id!==id); delete scores[id]; save(); fbDel('groups/'+id); fbDel('scores/'+id); render(); };
 
-// ---------- modal chấm 3 tiêu chí (chỉ thấy điểm chung, không thấy điểm người khác) ----------
+// ---------- modal chấm nhóm: 1 điểm/nhóm, chỉ thấy điểm chung ----------
 function openModal(id){
-  currentId=id; const p=photos.find(x=>x.id===id); if(!p) return;
-  const ro=!canScore(); // thí sinh: mở xem ảnh lớn + ý nghĩa, không chấm được
-  $('mImg').src=p.img; $('mTitle').textContent=p.title; $('mAuthor').textContent='👤 '+p.author;
-  $('mDesc').textContent=p.desc?('💭 '+p.desc):''; $('mDesc').style.display=p.desc?'':'none';
+  currentId=id; const gd=groups.find(x=>x.id===id); if(!gd) return;
+  const ro=!canScore(); // thí sinh: xem + ý nghĩa, không chấm được
+  $('mImg').src=(gd.items[0]||{}).img||''; $('mTitle').textContent='👥 '+gd.team; $('mAuthor').textContent=`📷 ${gd.items.length} ảnh trong nhóm`;
+  $('mDesc').textContent=gd.desc?('💭 '+gd.desc):''; $('mDesc').style.display=gd.desc?'':'none';
+  $('mThumbs').innerHTML=gd.items.map((it,i)=>`<img src="${it.img}" data-i="${i}" class="mthumb w-16 h-14 object-cover rounded-lg cursor-zoom-in shrink-0 ring-1 ring-white/20">`).join('');
+  $('mThumbs').querySelectorAll('.mthumb').forEach(im=>im.onclick=()=>openLight(gd.items,+im.dataset.i));
   const my=(scores[id]||{})[judge()];
   if(my){ $('mC1').value=my.c1??my.score??8; $('mC2').value=my.c2??my.score??8; $('mC3').value=my.c3??my.score??8; $('mComment').value=my.comment||''; }
   else { $('mC1').value=8; $('mC2').value=8; $('mC3').value=8; $('mComment').value=''; }
@@ -493,29 +703,152 @@ $('btnSubmit').onclick = ()=>{
   const entry={c1,c2,c3,score:+((c1+c2+c3)/3).toFixed(2), comment:$('mComment').value.trim(), at:Date.now()};
   scores[currentId][judge()]=entry;
   save(); fbSet('scores/'+currentId+'/'+judge(), entry);
-  render(); $('modal').classList.add('hidden'); alert('Đã ghi nhận điểm!');
+  render(); if(!$('tab-group').classList.contains('hidden')) openGroup(currentId);
+  $('modal').classList.add('hidden'); alert('Đã ghi nhận điểm cho nhóm!');
 };
 
 // ---------- board actions ----------
 $('btnToggleDetail').onclick = e=>{ if(!isAdmin()) return; showDetail=!showDetail; e.target.textContent=showDetail?'🙈 Ẩn chi tiết':'👁 Hiện chi tiết ai chấm'; render(); };
-$('btnReset').onclick = ()=>{ if(!isAdmin()) return alert('Chỉ Admin!'); if(!confirm('Xóa TOÀN BỘ ảnh + điểm?'))return; photos=[]; scores={}; sync(); render(); };
+$('btnPublish').onclick = ()=>{ if(!isAdmin()) return; published=!published; savePublished(); applyRole(); if(published) openShow(); };
+// ---------- thẻ top điểm BGK siêu cute ----------
+const cuteMedal=['🥇','🥈','🥉'];
+$('btnCert').onclick = ()=>{
+  if(!isAdmin()) return;
+  const top=[...groups].filter(g=>cnt(g.id)>0).sort((x,y)=>avg(y.id)-avg(x.id)).slice(0,3);
+  if(!top.length) return alert('Chưa có nhóm nào được chấm điểm!');
+  $('certList').innerHTML=`<div class="cute-card">
+    <div class="text-center mt-4 mb-1 text-xs font-bold tracking-widest" style="color:#a21caf">🌸 MỘNG NIÊN HOA | DREAMS OF YOUTH 🌸</div>
+    <h2 class="text-center text-3xl font-extrabold" style="color:#0a1445"><span class="bounce-slow">🏆</span> BẢNG VÀNG BGK <span class="bounce-slow">🏆</span></h2>
+    <p class="text-center text-xs italic mb-4" style="color:#64748b">Top điểm BGK chấm • ${showDate()}</p>
+    <div class="space-y-3">`+top.map((g,i)=>`
+      <div class="cute-row flex gap-3 items-center p-3">
+        <div class="text-4xl shrink-0">${cuteMedal[i]}</div>
+        <img src="${(g.items[0]||{}).img||''}" class="w-16 h-16 object-cover shrink-0" style="border-radius:16px;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.15)">
+        <div class="flex-1 min-w-0">
+          <div class="font-extrabold truncate" style="color:#0a1445">${esc(g.team)}</div>
+          <div class="mt-1"><span class="cute-chip">💡 ${avgC(g.id,'c1').toFixed(1)}</span><span class="cute-chip">💭 ${avgC(g.id,'c2').toFixed(1)}</span><span class="cute-chip">🎨 ${avgC(g.id,'c3').toFixed(1)}</span></div>
+        </div>
+        <div class="cute-score font-extrabold text-3xl shrink-0">⭐ ${avg(g.id).toFixed(1)}</div>
+      </div>`).join('')+`</div>
+    <p class="text-center text-xs mt-4" style="color:#a21caf">💖 Cảm ơn các nhóm đã tham gia — thanh xuân rực rỡ! 💖</p>
+  </div>`;
+  $('certView').classList.remove('hidden');
+};
+$('btnCloseCert').onclick=()=>$('certView').classList.add('hidden');
+// ---------- trình chiếu công bố: hiện từng hạng từ thấp lên cao ----------
+function openShow(){
+  $('resultsShow').classList.remove('hidden');
+  $('showStage').innerHTML=`<div class="text-center py-8"><button id="btnStartShow" class="px-8 py-3 rounded-2xl bg-amber-500 text-black font-extrabold text-lg" style="box-shadow:0 0 30px rgba(245,158,11,.6)">🎬 Bắt đầu công bố</button></div>`;
+  $('btnStartShow').onclick=runShow;
+}
+function runShow(){
+  const sorted=[...groups].filter(g=>cnt(g.id)>0).sort((x,y)=>avg(y.id)-avg(x.id));
+  const st=$('showStage'); st.innerHTML='';
+  if(!sorted.length){ st.innerHTML='<p class="text-center text-slate-300 py-8">Chưa có điểm nào để công bố.</p>'; return; }
+  const medal=['🥇','🥈','🥉'];
+  const ringC=['ring-amber-400/70','ring-slate-300/50','ring-orange-400/50'];
+  const countUp=(el,target)=>{ const t0=performance.now(); (function cu(t){ const p=Math.min(1,(t-t0)/900); el.textContent='⭐ '+(target*(1-Math.pow(1-p,3))).toFixed(2); if(p<1)requestAnimationFrame(cu); })(t0); };
+  st.innerHTML=`<div id="podZone" class="flex items-end justify-center gap-2 md:gap-4 mb-6"></div><div id="tblZone" class="w-full space-y-2"></div>`;
+  const slots={};
+  [1,0,2].forEach(k=>{ // bục trống 2-1-3 chờ lấp đầy
+    const s=document.createElement('div');
+    s.className=(k===0?'w-[44%]':'w-[28%]')+' rounded-2xl border-2 border-dashed border-white/15 flex items-center justify-center text-4xl text-white/20 '+(k===0?'min-h-[230px]':'min-h-[150px]');
+    s.textContent='?'; $('podZone').appendChild(s); slots[k]=s;
+  });
+  const order=[...sorted].reverse(); // duyệt từ hạng thấp lên cao
+  order.forEach((g,ri)=>{
+    setTimeout(()=>{
+      const rank=order.length-1-ri;
+      whoosh(); ding(ri); // vút + chuông cao dần khi gần top
+      if(rank===1) drumroll(); // trống dồn trước quán quân
+      if(rank<3){ // lấp bục podium
+        const big=rank===0, s=slots[rank];
+        s.className=(big?'w-[44%]':'w-[28%]')+' text-center';
+        s.innerHTML=`<div class="show-row ${big?'champ rounded-2xl p-2 bg-gradient-to-b from-amber-500/25 to-transparent ring-1 ring-amber-400/70':''}">
+          <div class="text-3xl mb-1">${big?'<span class="crown">👑</span><br>':''}${medal[rank]}</div>
+          <img src="${(g.items[0]||{}).img||''}" class="w-full ${big?'h-32 md:h-44':'h-20 md:h-28'} object-cover rounded-2xl ring-2 ${ringC[rank]} cursor-pointer">
+          <div class="font-bold truncate mt-1 ${big?'text-base':'text-sm'}">👥 ${esc(g.team)}</div>
+          <div class="pts text-amber-400 font-extrabold ${big?'text-3xl':'text-xl'}">⭐ 0.00</div>
+          <div class="text-[11px] text-slate-400">${cnt(g.id)} BGK • ${g.items.length} ảnh</div></div>`;
+        s.querySelector('img').onclick=()=>{ $('resultsShow').classList.add('hidden'); openGroup(g.id); };
+        countUp(s.querySelector('.pts'), avg(g.id));
+        if(rank===0){ fanfare(); boom(); }
+      } else { // top 4+ vào bảng
+        const d=document.createElement('div');
+        d.className='show-row flex gap-3 items-center rounded-2xl p-3 ring-1 bg-white/5 ring-white/10';
+        d.innerHTML=`
+          <div class="text-xl font-extrabold w-10 text-center shrink-0">#${rank+1}</div>
+          <img src="${(g.items[0]||{}).img||''}" class="w-16 h-14 object-cover rounded-xl shrink-0 cursor-pointer">
+          <div class="flex-1 min-w-0">
+            <div class="font-bold truncate">👥 ${esc(g.team)}</div>
+            <div class="text-xs text-slate-400">${g.items.length} ảnh • ${cnt(g.id)} BGK</div>
+          </div>
+          <div class="text-right shrink-0"><div class="pts text-amber-400 font-extrabold text-2xl">⭐ 0.00</div></div>`;
+        d.querySelector('img').onclick=()=>{ $('resultsShow').classList.add('hidden'); openGroup(g.id); };
+        $('tblZone').prepend(d);
+        countUp(d.querySelector('.pts'), avg(g.id));
+      }
+    }, ri*1100);
+  });
+}
+$('btnCloseShow').onclick=()=>$('resultsShow').classList.add('hidden');
+$('btnShow').onclick=()=>{ if(published||isAdmin()) openShow(); };
+// ---------- âm thanh công bố (tổng hợp, không cần file) ----------
+let AC=null, muted=localStorage.getItem('pc_mute')==='1';
+const paintMute=()=>{ $('btnMute').textContent=muted?'🔇':'🔊'; }; paintMute();
+$('btnMute').onclick=()=>{ muted=!muted; localStorage.setItem('pc_mute',muted?'1':'0'); paintMute(); };
+function ac(){ if(!AC) AC=new (window.AudioContext||window.webkitAudioContext)(); if(AC.state==='suspended') AC.resume(); return AC; }
+function tone(f,t0,dur,type,vol){ if(muted) return; try{
+  const c=ac(),o=c.createOscillator(),g=c.createGain();
+  o.type=type||'triangle'; o.frequency.value=f;
+  g.gain.setValueAtTime(.0001,c.currentTime+t0);
+  g.gain.linearRampToValueAtTime(vol||.22,c.currentTime+t0+.03);
+  g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+t0+dur);
+  o.connect(g); g.connect(c.destination); o.start(c.currentTime+t0); o.stop(c.currentTime+t0+dur+.05);
+}catch(e){} }
+const ding = step => tone(440+step*70, 0, .4); // càng gần top càng cao
+function whoosh(){ if(muted) return; try{ // tiếng vút khi hiện hạng
+  const c=ac(), len=c.sampleRate*.5, b=c.createBuffer(1,len,c.sampleRate), d=b.getChannelData(0);
+  for(let i=0;i<len;i++) d[i]=Math.random()*2-1;
+  const s=c.createBufferSource(); s.buffer=b;
+  const f=c.createBiquadFilter(); f.type='bandpass'; f.Q.value=1.2;
+  f.frequency.setValueAtTime(280,c.currentTime); f.frequency.exponentialRampToValueAtTime(4200,c.currentTime+.45);
+  const g=c.createGain(); g.gain.setValueAtTime(.0001,c.currentTime);
+  g.gain.linearRampToValueAtTime(.16,c.currentTime+.12); g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+.5);
+  s.connect(f); f.connect(g); g.connect(c.destination); s.start();
+}catch(e){} }
+function kick(t,v){ tone(150,t,.22,'sine',v||.3); tone(52,t,.3,'sine',v||.3); }
+function drumroll(){ for(let i=0;i<14;i++) tone(95+Math.random()*55, i*.065, .06, 'square', .06); kick(14*.065+.03,.35); }
+function fanfare(){
+  [[392,0,.14],[523,.14,.14],[659,.28,.14],[784,.42,.55],[659,1.0,.22],[784,1.25,1.1]].forEach(([f,t,d])=>{ tone(f,t,d,'triangle',.26); tone(f*2,t,d,'sine',.07); });
+  [196,196,262,330,196].forEach((f,i)=>tone(f,i*.25,.24,'sine',.13));
+  [1047,1319,1568].forEach((f,i)=>tone(f,1.25+i*.09,.8,'sine',.05));
+  kick(0,.3); kick(1.25,.35);
+}
+function boom(){ // pháo giấy
+  const c=$('confetti'), x=c.getContext('2d'); c.width=innerWidth; c.height=innerHeight;
+  const cols=['#fbbf24','#fef3c7','#93c5fd','#ffffff','#f472b6'], P=[];
+  for(let i=0;i<160;i++) P.push({x:innerWidth/2+(Math.random()-.5)*240,y:innerHeight*.32,vx:(Math.random()-.5)*11,vy:Math.random()*-9-3,g:.32,s:Math.random()*6+3,r:Math.random()*6,vr:(Math.random()-.5)*.3,c:cols[i%5],l:1});
+  let f=0; (function tick(){ x.clearRect(0,0,c.width,c.height);
+    P.forEach(p=>{ p.x+=p.vx; p.y+=p.vy; p.vy+=p.g; p.r+=p.vr; p.l-=.007;
+      x.save(); x.translate(p.x,p.y); x.rotate(p.r); x.globalAlpha=Math.max(0,p.l); x.fillStyle=p.c; x.fillRect(-p.s/2,-p.s/2,p.s,p.s*.62); x.restore(); });
+    if(++f<240) requestAnimationFrame(tick); else x.clearRect(0,0,c.width,c.height); })();
+}
+$('btnReset').onclick = ()=>{ if(!isAdmin()) return alert('Chỉ Admin!'); if(!confirm('Xóa TOÀN BỘ nhóm + điểm?'))return; groups=[]; scores={}; sync(); render(); };
 $('btnUpload').onclick = ()=>{
   if(!canUpload()) return alert(isLocked()?'Đã hết hạn gửi bài!':'Quyền BGK chỉ chấm, không đăng ảnh.');
   if(!queue.length) return alert('Chọn ít nhất 1 ảnh trước!');
-  if(!$('upTitle').value.trim()) return alert('Nhập tên tác phẩm!');
-  const t=$('upTitle').value.trim(), a=$('upAuthor').value.trim()||'Ẩn danh', d=$('upDesc').value.trim(), now=Date.now();
-  queue.forEach((q,i)=>{
-    const photo={id:'p'+now+'_'+i, title:queue.length>1?`${t} (${i+1})`:t, author:a, desc:d, img:q.src, at:now+i, by:judge()||'?'};
-    photos.unshift(photo); fbSet('photos/'+photo.id, photo);
-  });
-  const n=queue.length; queue=[]; renderQueue();
-  $('upTitle').value=''; $('upAuthor').value=''; $('upDesc').value='';
-  save(); render(); gotoTab(canScore()?'score':'board'); alert(`Đã đăng ${n} ảnh!`);
+  if(!$('upTeam').value.trim()) return alert('Nhập tên nhóm!');
+  const g={id:'g'+Date.now(), team:$('upTeam').value.trim(), desc:$('upDesc').value.trim(), items:queue.map(q=>({img:q.src,cap:q.cap.trim()})), at:Date.now(), by:judge()||'?'};
+  groups.unshift(g);
+  queue=[]; renderQueue(); $('upTeam').value=''; $('upDesc').value='';
+  save(); fbSet('groups/'+g.id, g);
+  render(); gotoTab(canScore()?'score':'board'); alert(`Đã đăng nhóm "${g.team}" (${g.items.length} ảnh)!`);
 };
 const dl = (name,blob) => { const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; a.click(); };
 $('btnBackup').onclick = ()=>{
   if(!isAdmin()) return alert('Chỉ Admin!');
-  dl('backup-mong-nien-hoa.json', new Blob([JSON.stringify({app:'mong-nien-hoa',exportedAt:new Date().toISOString(),photos,scores,judges,lock})],{type:'application/json'}));
+  dl('backup-mong-nien-hoa.json', new Blob([JSON.stringify({app:'mong-nien-hoa',exportedAt:new Date().toISOString(),groups,scores,judges,lock,published,eventDate})],{type:'application/json'}));
 };
 $('btnRestore').onclick = ()=>{ if(!isAdmin()) return alert('Chỉ Admin!'); $('restoreFile').click(); };
 $('restoreFile').onchange = e=>{
@@ -523,18 +856,20 @@ $('restoreFile').onchange = e=>{
   const r=new FileReader();
   r.onload=()=>{ try{
     const d=JSON.parse(r.result);
-    if(!d.photos||!d.scores) return alert('File backup không hợp lệ!');
-    if(!confirm(`Khôi phục backup (${d.photos.length} ảnh, xuất lúc ${d.exportedAt||'?'})? Dữ liệu hiện tại sẽ bị thay thế!`)) return;
-    photos=d.photos; scores=d.scores; if(d.judges) judges=d.judges; if(d.lock) lock=d.lock;
-    save(); saveJudges(); saveLock(); syncPush(); applyRole(); alert('Đã khôi phục!');
+    const gs=d.groups||(d.photos||[]).map(toGroup);
+    if(!gs.length||!d.scores) return alert('File backup không hợp lệ!');
+    if(!confirm(`Khôi phục backup (${gs.length} nhóm, xuất lúc ${d.exportedAt||'?'})? Dữ liệu hiện tại sẽ bị thay thế!`)) return;
+    groups=gs; scores=d.scores; if(d.judges) judges=d.judges; if(d.lock) lock=d.lock; if(d.published!=null) published=!!d.published; if(d.eventDate!=null) eventDate=d.eventDate||'';
+    saveEventDate();
+    save(); saveJudges(); saveLock(); savePublished(); syncPush(); applyRole(); alert('Đã khôi phục!');
   }catch(err){ alert('File lỗi: '+err.message); } e.target.value=''; };
   r.readAsText(f);
 };
 $('btnExport').onclick = ()=>{
   if(!isAdmin()) return alert('Chỉ Admin được xuất file!');
   const q = s => '"'+String(s??'').replace(/"/g,'""')+'"';
-  let csv='Hang,Tac pham,Tac gia,Y nghia,Diem TB,Y tuong,Noi dung,Tham my,Luot cham\n';
-  [...photos].sort((a,b)=>avg(b.id)-avg(a.id)).forEach((p,i)=>{ csv+=`${i+1},${q(p.title)},${q(p.author)},${q(p.desc)},${cnt(p.id)?avg(p.id).toFixed(2):''},${cnt(p.id)?avgC(p.id,'c1').toFixed(2):''},${cnt(p.id)?avgC(p.id,'c2').toFixed(2):''},${cnt(p.id)?avgC(p.id,'c3').toFixed(2):''},${cnt(p.id)}\n`; });
+  let csv='Hang,Nhom,So anh,Y nghia,Diem TB,Y tuong,Noi dung,Tham my,Luot cham\n';
+  [...groups].sort((a,b)=>avg(b.id)-avg(a.id)).forEach((g,i)=>{ csv+=`${i+1},${q(g.team)},${g.items.length},${q(g.desc)},${cnt(g.id)?avg(g.id).toFixed(2):''},${cnt(g.id)?avgC(g.id,'c1').toFixed(2):''},${cnt(g.id)?avgC(g.id,'c2').toFixed(2):''},${cnt(g.id)?avgC(g.id,'c3').toFixed(2):''},${cnt(g.id)}\n`; });
   const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob(["\ufeff"+csv],{type:'text/csv'})); a.download='ket-qua-cham-anh.csv'; a.click();
 };
 
