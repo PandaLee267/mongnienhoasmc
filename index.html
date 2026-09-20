@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MỘNG NIÊN HOA | DREAMS OF YOUTH — Chấm Thi Ảnh</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%230a1445'/%3E%3Cpath d='M32 8l6.2 12.9 14.1 1.9-10.3 9.7 2.6 14-12.6-6.9-12.6 6.9 2.6-14-10.3-9.7 14.1-1.9z' fill='%23fbbf24'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%230a1445'/%3E%3Cg fill='%23f9a8d4'%3E%3Cellipse cx='32' cy='18' rx='8' ry='12'/%3E%3Cellipse cx='32' cy='18' rx='8' ry='12' transform='rotate(72 32 32)'/%3E%3Cellipse cx='32' cy='18' rx='8' ry='12' transform='rotate(144 32 32)'/%3E%3Cellipse cx='32' cy='18' rx='8' ry='12' transform='rotate(216 32 32)'/%3E%3Cellipse cx='32' cy='18' rx='8' ry='12' transform='rotate(288 32 32)'/%3E%3C/g%3E%3Ccircle cx='32' cy='32' r='6' fill='%23fde68a'/%3E%3C/svg%3E">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
@@ -88,7 +88,7 @@
     <div class="absolute bottom-0 inset-x-0 h-20 bg-gradient-to-t from-[#060d2b] to-transparent pointer-events-none"></div>
   </div>
   <div class="text-center mb-6">
-    <p class="text-blue-200/70 text-sm">BGK chấm độc lập • Chỉ hiện <b class="text-amber-300">điểm trung bình chung</b></p>
+    <p class="text-blue-200/70 text-sm">Câu lạc bộ Truyền thông Sinh viên Sao Đỏ<br>Cuộc Thi: <b class="text-amber-300">🌸 MỘNG NIÊN HOA | DREAMS OF YOUTH 🌸</b></p>
     <div id="connBadge" class="inline-block mt-2 text-xs px-3 py-1 rounded-full bg-slate-700">⚪ Chưa kết nối đa thiết bị (lưu máy này)</div>
   </div>
 
@@ -130,8 +130,10 @@
   <div id="tab-upload" class="hidden">
     <div class="bg-slate-800 rounded-2xl p-5 max-w-xl mx-auto">
       <h2 class="font-bold text-lg mb-3">📤 Đăng nhóm dự thi — MỘNG NIÊN HOA</h2>
-      <input id="upTeam" placeholder="Tên nhóm (VD: Nhóm Sao Mai...)" class="w-full mb-2 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 outline-none focus:border-amber-500">
-      <textarea id="upDesc" rows="3" placeholder="💭 Ý nghĩa chung của nhóm ảnh (không bắt buộc)..." class="w-full mb-2 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 outline-none focus:border-amber-500 text-sm"></textarea>
+      <input id="upTeam" placeholder="Tên nhóm (VD: NHÓM 1 - THE BLOOMERS...)" class="w-full mb-2 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 outline-none focus:border-amber-500">
+      <input id="upTitle" placeholder="Tiêu đề tác phẩm..." class="w-full mb-2 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 outline-none focus:border-amber-500">
+      <textarea id="upMembers" rows="3" placeholder="Tên các thành viên, mỗi bạn 1 dòng... (VD:&#10;1. Nguyễn Văn A: DK14 - NTQ1&#10;2. Nguyễn Thị B: DK17 - CNTT2)" class="w-full mb-2 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 outline-none focus:border-amber-500 text-sm"></textarea>
+      <textarea id="upDesc" rows="3" placeholder="💭 Nội dung / ý nghĩa nhóm ảnh (bắt buộc)... *" class="w-full mb-2 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 outline-none focus:border-amber-500 text-sm"></textarea>
       <input id="upFile" type="file" accept="image/*" multiple class="w-full mb-3 text-sm text-slate-400">
       <div id="upQueue" class="space-y-2 mb-3"></div>
       <button id="btnUpload" class="w-full bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-xl py-3">Đăng nhóm</button>
@@ -151,12 +153,11 @@
       <button id="btnRestore" class="px-4 py-2 rounded-xl bg-slate-600 font-bold text-sm">📥 Khôi phục</button>
       <input id="restoreFile" type="file" accept="application/json" class="hidden">
       <button id="btnPublish" class="px-4 py-2 rounded-xl bg-amber-500 text-black font-bold text-sm">📢 Công bố</button>
-      <button id="btnCert" class="px-4 py-2 rounded-xl bg-violet-600 font-bold text-sm">🍭 Thẻ top BGK</button>
       <button id="btnToggleDetail" class="px-4 py-2 rounded-xl bg-slate-700 font-bold text-sm">👁 Hiện chi tiết ai chấm</button>
       <button id="btnReset" class="px-4 py-2 rounded-xl bg-red-600/80 font-bold text-sm">🗑 Xóa toàn bộ</button>
     </div>
     <p id="viewerNote" class="hidden text-xs text-slate-500 mb-3">🔒 Bạn đang ở quyền xem điểm: chỉ thấy điểm trung bình chung, không thấy ai chấm bao nhiêu.</p>
-    <div class="text-center mb-4"><button id="btnShow" class="px-6 py-2.5 rounded-xl bg-amber-500 text-black font-bold" style="box-shadow:0 0 24px rgba(245,158,11,.5)">🎬 Xem công bố kết quả</button></div>
+    <div class="text-center mb-4 flex gap-2 justify-center flex-wrap"><button id="btnShow" class="px-6 py-2.5 rounded-xl bg-amber-500 text-black font-bold" style="box-shadow:0 0 24px rgba(245,158,11,.5)">🎬 Xem công bố kết quả</button><button id="btnCert" class="px-6 py-2.5 rounded-xl bg-violet-600 font-bold">🍭 Thẻ top BGK</button></div>
     <div id="boardList" class="space-y-3"></div>
   </div>
 
@@ -182,9 +183,9 @@
         </div>
       </div>
       <div class="mt-4 pt-4 border-t border-slate-700">
-        <h3 class="font-bold text-sm mb-2">📤 Tài khoản Thí sinh — dùng chung (đăng nhập: smcsaodo)</h3>
+        <h3 class="font-bold text-sm mb-2">📤 Tài khoản Thành viên — dùng chung (đăng nhập: smcsaodo)</h3>
         <div class="flex gap-2">
-          <input id="newViewerPass" type="password" placeholder="Mật khẩu thí sinh mới..." class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-sm outline-none">
+          <input id="newViewerPass" type="password" placeholder="Mật khẩu thành viên mới..." class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-sm outline-none">
           <button id="btnViewerPass" class="px-4 bg-slate-700 rounded-xl py-2 text-sm font-bold">Đổi</button>
         </div>
       </div>
@@ -217,7 +218,15 @@
       </div>
     </div>
   </div>
-</div>
+  <footer class="text-center mt-10 pb-6">
+    <div class="inline-flex items-center gap-2 text-xs text-slate-500 bg-white/5 border border-white/10 rounded-full px-5 py-2">
+      <span>🌸 MỘNG NIÊN HOA | DREAMS OF YOUTH 🌸</span>
+      <span class="text-slate-700">•</span>
+      <span>Nguồn: <b class="text-amber-300/90">SMCSAODO</b></span>
+      <span class="text-slate-700">•</span>
+      <span>Thiết kế: <b class="text-amber-300/90">PandaLee</b></span>
+    </div>
+  </footer>
 
 <!-- Màn hình đăng nhập -->
 <div id="loginOverlay" class="fixed inset-0 z-[100] flex items-center justify-center p-4" style="background:rgba(4,8,31,.88);backdrop-filter:blur(8px)">
@@ -285,6 +294,27 @@
   </div>
 </div>
 
+<!-- Modal Admin sửa nhóm -->
+<div id="editModal" class="hidden fixed inset-0 bg-black/70 p-4 flex items-center justify-center z-[115] overflow-y-auto">
+  <div class="bg-slate-800 rounded-2xl max-w-md w-full p-5 my-8">
+    <h3 class="font-bold text-lg mb-3">✏️ Sửa nhóm</h3>
+    <label class="text-xs text-slate-400">Tên nhóm</label>
+    <input id="edTeam" class="w-full mt-1 mb-2 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-sm outline-none">
+    <label class="text-xs text-slate-400">Tiêu đề</label>
+    <input id="edTitle" class="w-full mt-1 mb-2 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-sm outline-none">
+    <label class="text-xs text-slate-400">Thành viên (mỗi bạn 1 dòng)</label>
+    <textarea id="edMembers" rows="3" class="w-full mt-1 mb-2 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-sm outline-none"></textarea>
+    <label class="text-xs text-slate-400">Nội dung / ý nghĩa</label>
+    <textarea id="edDesc" rows="3" class="w-full mt-1 mb-2 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-sm outline-none"></textarea>
+    <label class="text-xs text-slate-400">Ảnh trong nhóm (bấm ✕ để xóa ảnh lẻ)</label>
+    <div id="edPhotos" class="grid grid-cols-4 gap-2 my-2"></div>
+    <div class="flex gap-2 mt-3">
+      <button id="btnEditClose" class="flex-1 bg-slate-700 rounded-xl py-2 font-bold">Hủy</button>
+      <button id="btnEditSave" class="flex-1 bg-amber-500 text-black rounded-xl py-2 font-bold">Lưu</button>
+    </div>
+  </div>
+</div>
+
 <!-- Modal chấm 3 tiêu chí -->
 <div id="modal" class="hidden fixed inset-0 bg-black/70 p-4 flex items-center justify-center z-50 overflow-y-auto">
   <div class="bg-slate-800 rounded-2xl max-w-md w-full p-5 my-8">
@@ -320,7 +350,7 @@
 
 <script>
 // ---------- state: nhóm dự thi {id,team,desc,items:[{img,cap}],at,by} — chấm 1 điểm/nhóm ----------
-const toGroup = p => ({id:p.id, team:p.author||p.team||'Ẩn danh', desc:p.desc||'', items:p.items||[{img:p.img,cap:p.cap||''}], at:p.at||Date.now(), by:p.by||'?'});
+const toGroup = p => ({id:p.id, team:p.author||p.team||'Ẩn danh', title:p.title||'', members:p.members||'', desc:p.desc||'', items:p.items||[{img:p.img,cap:p.cap||''}], at:p.at||Date.now(), by:p.by||'?'});
 let groups = JSON.parse(localStorage.getItem('pc_groups')||'null');
 if(!groups){ // tự chuyển dữ liệu ảnh lẻ cũ sang nhóm (giữ nguyên id → giữ nguyên điểm đã chấm)
   const old = JSON.parse(localStorage.getItem('pc_photos')||'[]');
@@ -337,7 +367,7 @@ let judges = JSON.parse(localStorage.getItem('pc_judges')||'{}');
 let judgeUser = sessionStorage.getItem('pc_judge_user')||'';
 const hasAccounts = () => Object.keys(judges).length>0;
 const judgeLogged = () => !!judgeUser && !!judges[judgeUser]; // BGK bắt buộc có TK do admin cấp
-const judge = () => role==='judge' ? judgeUser : role==='uploader' ? 'Thí sinh' : 'Admin';
+const judge = () => role==='judge' ? judgeUser : role==='uploader' ? 'Thành viên' : 'Admin';
 // ponytail: tương thích điểm cũ 1 số (v.score) + điểm mới 3 tiêu chí
 const totalOf = v => (v.c1!=null ? (+v.c1 + +v.c2 + +v.c3)/3 : +v.score||0);
 const avg = id => { const s = Object.values(scores[id]||{}); return s.length ? s.reduce((a,b)=>a+totalOf(b),0)/s.length : 0; };
@@ -379,10 +409,15 @@ function openGroup(id){
       <div class="flex flex-col md:flex-row md:items-center gap-3 justify-between">
         <div class="min-w-0">
           <h2 class="text-2xl font-extrabold">👥 ${esc(gd.team)}</h2>
+          ${gd.title?`<p class="text-amber-200 font-bold mt-1">📌 ${esc(gd.title)}</p>`:''}
+          ${gd.members?`<p class="text-xs text-slate-400 mt-1">🧑‍🤝‍🧑 Thành viên:<br>${esc(gd.members).replace(/\n/g,'<br>')}</p>`:''}
           ${gd.desc?`<p class="text-sm text-slate-300 italic mt-1">💭 ${esc(gd.desc)}</p>`:''}
           <p class="text-xs text-slate-500 mt-1">📷 ${gd.items.length} ảnh • ⭐ Trung bình chung: <b class="text-amber-400">${n?a.toFixed(2):'–'}</b> (${n} lượt chấm)</p>
         </div>
-        ${canScore()?`<button onclick="openModal('${id}')" class="px-6 py-3 rounded-xl bg-amber-500 text-black font-bold shrink-0">${my?'✏️ Sửa điểm ('+totalOf(my).toFixed(1)+')':'⭐ Chấm nhóm này'}</button>`:`<span class="text-xs text-slate-500 shrink-0">🔒 ${isLocked()&&!isAdmin()?'Đã chốt điểm':'Chế độ xem điểm'}</span>`}
+        <div class="flex gap-2 shrink-0">
+        ${canScore()?`<button onclick="openModal('${id}')" class="px-6 py-3 rounded-xl bg-amber-500 text-black font-bold">${my?'✏️ Sửa điểm ('+totalOf(my).toFixed(1)+')':'⭐ Chấm nhóm này'}</button>`:`<span class="text-xs text-slate-500 self-center">🔒 ${isLocked()&&!isAdmin()?'Đã chốt điểm':'Chế độ xem điểm'}</span>`}
+        ${isAdmin()?`<button onclick="openEdit('${id}')" class="px-4 py-3 rounded-xl bg-slate-700 font-bold text-sm">✏️ Sửa nhóm</button>`:''}
+        </div>
       </div>
     </div>
     <div class="grid sm:grid-cols-2 gap-4">
@@ -433,9 +468,9 @@ $('btnLogout').onclick = ()=>{
   $('loginOverlay').classList.remove('hidden'); render();
 };
 function applyRole(){
-  $('userName').textContent = role==='judge'?judgeUser:role==='uploader'?'Thí sinh':'Admin';
+  $('userName').textContent = role==='judge'?judgeUser:role==='uploader'?'Thành viên':'Admin';
   $('userAvatar').textContent = role==='uploader'?'📤':role==='admin'?'👑':'🧑‍⚖️';
-  $('roleBadge').textContent = isAdmin()?'Admin — toàn quyền':role==='judge'?'BGK — chấm điểm':role==='uploader'?'Thí sinh — gửi ảnh + xem điểm':'';
+  $('roleBadge').textContent = isAdmin()?'Admin — toàn quyền':role==='judge'?'BGK — chấm điểm':role==='uploader'?'Thành viên — gửi ảnh + xem điểm':'';
   renderJudgeList();
   // Admin luôn thấy chi tiết ai chấm, các quyền khác bị ẩn
   showDetail = isAdmin();
@@ -445,10 +480,11 @@ function applyRole(){
   });
   $('adminBar').style.display = isAdmin()?'':'none';
   $('btnShow').style.display = (published||isAdmin())?'':'none';
+  $('btnCert').style.display = (published||isAdmin())?'':'none';
   $('viewerNote').classList.toggle('hidden', isAdmin());
   // trạng thái chốt điểm
   const dl = lock.deadline ? new Date(lock.deadline).toLocaleString('vi-VN') : 'chưa đặt';
-  $('lockStatus').textContent = isLocked() ? '🔒 ĐANG KHÓA — BGK/thí sinh không chấm/gửi được nữa.' : '⏳ Đang mở — hạn: '+dl+'.';
+  $('lockStatus').textContent = isLocked() ? '🔒 ĐANG KHÓA — BGK/thành viên không chấm/gửi được nữa.' : '⏳ Đang mở — hạn: '+dl+'.';
   $('btnLockToggle').textContent = lock.locked ? '🔓 Mở chấm lại' : '🔒 Chốt ngay';
   $('btnPublish').textContent = published ? '🙈 Ẩn kết quả' : '📢 Công bố';
   if(lock.deadline && isAdmin()){ const d=new Date(lock.deadline); $('lockDeadline').value = new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16); }
@@ -512,7 +548,7 @@ $('btnViewerPass').onclick = ()=>{
   const v=$('newViewerPass').value.trim(); if(!v) return alert('Nhập mật khẩu mới!');
   localStorage.setItem('pc_viewer_pass',v);
   if(useFb) db.ref('settings/viewerPass').set(v);
-  $('newViewerPass').value=''; alert('Đã đổi mật khẩu TK thí sinh!');
+  $('newViewerPass').value=''; alert('Đã đổi mật khẩu TK thành viên!');
 };
 
 // ---------- firebase ----------
@@ -607,6 +643,7 @@ function render(){
       </div>
       <div class="p-4">
         <div class="font-bold truncate">👥 ${esc(gd.team)}</div>
+        ${gd.title?`<div class="text-xs text-amber-200/90 truncate">📌 ${esc(gd.title)}</div>`:''}
         ${gd.desc?`<div class="text-xs text-slate-300 italic mb-2 line-clamp-2">💭 ${esc(gd.desc)}</div>`:''}
         <div class="flex items-center justify-between bg-slate-900 rounded-xl px-3 py-2 mb-3">
           <span class="text-xs text-slate-400">⭐ Trung bình chung<br><b class="text-amber-400 text-lg">${n?a.toFixed(1):'–'}</b> <span class="text-slate-500">(${n} lượt)</span></span>
@@ -641,6 +678,7 @@ function render(){
         <div class="text-3xl md:text-4xl mb-1">${big?'<span class="crown">👑</span><br>':''}${medal[k]}</div>
         <img src="${(g.items[0]||{}).img||''}" class="w-full ${big?'h-32 md:h-48':'h-20 md:h-28'} object-cover rounded-2xl ring-2 ${ringC[k]} ${big?'shadow-[0_0_40px_rgba(245,158,11,.45)]':''}">
         <div class="font-bold truncate mt-1 ${big?'text-base md:text-lg':'text-xs md:text-sm'}">👥 ${esc(g.team)}</div>
+        ${g.title?`<div class="text-[11px] text-amber-200/80 truncate">📌 ${esc(g.title)}</div>`:''}
         <div class="text-amber-400 font-extrabold ${big?'text-3xl md:text-4xl':'text-xl'}">⭐ ${avg(g.id).toFixed(2)}</div>
         <div class="text-[11px] text-slate-500">${cnt(g.id)} BGK • ${g.items.length} ảnh</div>
         ${big?'':`<div class="${stepH[k]} rounded-t-xl mt-1 flex items-start justify-center pt-1 text-xl font-extrabold text-slate-900/60" style="background:${stepBg[k]}">${k+1}</div>`}
@@ -656,6 +694,7 @@ function render(){
       <img src="${(g.items[0]||{}).img||''}" class="w-16 h-14 object-cover rounded-xl shrink-0">
       <div class="flex-1 min-w-0">
         <div class="font-bold text-sm truncate">👥 ${esc(g.team)} <span class="font-normal text-slate-500 text-[11px]">(${g.items.length} ảnh)</span></div>
+        ${g.title?`<div class="text-xs text-amber-200/80 truncate">📌 ${esc(g.title)}</div>`:''}
         <div class="flex gap-1 mt-1.5">${bar(avgC(g.id,'c1'),'#fbbf24')}${bar(avgC(g.id,'c2'),'#60a5fa')}${bar(avgC(g.id,'c3'),'#f472b6')}</div>
         ${showDetail?`<div class="text-xs text-slate-400 mt-1">${Object.entries(scores[g.id]||{}).map(([j,v])=>`${esc(j)}: <b class="text-slate-200">${totalOf(v).toFixed(1)}</b> <span class="text-slate-500">(${v.c1??'–'}/${v.c2??'–'}/${v.c3??'–'})</span>${v.comment?' ('+esc(v.comment)+')':''}`).join('<br>')||'Chưa có điểm'}</div>`:''}
       </div>
@@ -666,6 +705,40 @@ function render(){
   boardAnimated=true;
 }
 window.delGroup = id => { if(!isAdmin()) return alert('Chỉ Admin được xóa!'); if(!confirm('Xóa cả nhóm này?'))return; groups=groups.filter(g=>g.id!==id); delete scores[id]; save(); fbDel('groups/'+id); fbDel('scores/'+id); render(); };
+// ---------- Admin sửa nhanh nhóm (không mất điểm đã chấm) ----------
+let editId=null;
+function openEdit(id){
+  if(!isAdmin()) return;
+  const g=groups.find(x=>x.id===id); if(!g) return;
+  editId=id;
+  $('edTeam').value=g.team||''; $('edTitle').value=g.title||''; $('edMembers').value=g.members||''; $('edDesc').value=g.desc||'';
+  renderEditPhotos();
+  $('editModal').classList.remove('hidden');
+}
+function renderEditPhotos(){
+  const g=groups.find(x=>x.id===editId); if(!g) return;
+  $('edPhotos').innerHTML=g.items.map((it,i)=>`
+    <div class="relative">
+      <img src="${it.img}" class="w-full h-16 object-cover rounded-lg">
+      <button onclick="delItemPhoto(${i})" class="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-red-600 text-white text-[10px] font-bold">✕</button>
+    </div>`).join('');
+}
+window.delItemPhoto = i => {
+  if(!isAdmin()) return;
+  const g=groups.find(x=>x.id===editId); if(!g) return;
+  if(g.items.length<=1) return alert('Nhóm phải giữ ít nhất 1 ảnh! Muốn xóa hết thì xóa cả nhóm.');
+  if(!confirm('Xóa ảnh này khỏi nhóm?')) return;
+  g.items.splice(i,1); renderEditPhotos();
+};
+$('btnEditClose').onclick=()=>$('editModal').classList.add('hidden');
+$('btnEditSave').onclick=()=>{
+  if(!isAdmin()||!editId) return;
+  const g=groups.find(x=>x.id===editId); if(!g) return;
+  if(!$('edTeam').value.trim()) return alert('Tên nhóm không được trống!');
+  g.team=$('edTeam').value.trim(); g.title=$('edTitle').value.trim(); g.members=$('edMembers').value.trim(); g.desc=$('edDesc').value.trim();
+  save(); fbSet('groups/'+g.id,g); render(); openGroup(g.id);
+  $('editModal').classList.add('hidden'); alert('Đã lưu!');
+};
 
 // ---------- modal chấm nhóm: 1 điểm/nhóm, chỉ thấy điểm chung ----------
 function openModal(id){
@@ -711,7 +784,7 @@ $('btnPublish').onclick = ()=>{ if(!isAdmin()) return; published=!published; sav
 // ---------- thẻ top điểm BGK siêu cute ----------
 const cuteMedal=['🥇','🥈','🥉'];
 $('btnCert').onclick = ()=>{
-  if(!isAdmin()) return;
+  if(!published && !isAdmin()) return;
   const top=[...groups].filter(g=>cnt(g.id)>0).sort((x,y)=>avg(y.id)-avg(x.id)).slice(0,3);
   if(!top.length) return alert('Chưa có nhóm nào được chấm điểm!');
   $('certList').innerHTML=`<div class="cute-card">
@@ -724,6 +797,7 @@ $('btnCert').onclick = ()=>{
         <img src="${(g.items[0]||{}).img||''}" class="w-16 h-16 object-cover shrink-0" style="border-radius:16px;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.15)">
         <div class="flex-1 min-w-0">
           <div class="font-extrabold truncate" style="color:#0a1445">${esc(g.team)}</div>
+          ${g.members?`<div class="text-[11px] italic" style="color:#64748b">${esc(g.members).replace(/\n/g,'<br>')}</div>`:''}
           <div class="mt-1"><span class="cute-chip">💡 ${avgC(g.id,'c1').toFixed(1)}</span><span class="cute-chip">💭 ${avgC(g.id,'c2').toFixed(1)}</span><span class="cute-chip">🎨 ${avgC(g.id,'c3').toFixed(1)}</span></div>
         </div>
         <div class="cute-score font-extrabold text-3xl shrink-0">⭐ ${avg(g.id).toFixed(1)}</div>
@@ -735,11 +809,13 @@ $('btnCert').onclick = ()=>{
 $('btnCloseCert').onclick=()=>$('certView').classList.add('hidden');
 // ---------- trình chiếu công bố: hiện từng hạng từ thấp lên cao ----------
 function openShow(){
+  try{ ac(); }catch(e){} // mở sẵn loa trong lúc bấm (điện thoại mới cho kêu)
   $('resultsShow').classList.remove('hidden');
   $('showStage').innerHTML=`<div class="text-center py-8"><button id="btnStartShow" class="px-8 py-3 rounded-2xl bg-amber-500 text-black font-extrabold text-lg" style="box-shadow:0 0 30px rgba(245,158,11,.6)">🎬 Bắt đầu công bố</button></div>`;
   $('btnStartShow').onclick=runShow;
 }
 function runShow(){
+  try{ ac(); }catch(e){} // mở sẵn loa trong lúc bấm
   const sorted=[...groups].filter(g=>cnt(g.id)>0).sort((x,y)=>avg(y.id)-avg(x.id));
   const st=$('showStage'); st.innerHTML='';
   if(!sorted.length){ st.innerHTML='<p class="text-center text-slate-300 py-8">Chưa có điểm nào để công bố.</p>'; return; }
@@ -837,9 +913,11 @@ $('btnUpload').onclick = ()=>{
   if(!canUpload()) return alert(isLocked()?'Đã hết hạn gửi bài!':'Quyền BGK chỉ chấm, không đăng ảnh.');
   if(!queue.length) return alert('Chọn ít nhất 1 ảnh trước!');
   if(!$('upTeam').value.trim()) return alert('Nhập tên nhóm!');
-  const g={id:'g'+Date.now(), team:$('upTeam').value.trim(), desc:$('upDesc').value.trim(), items:queue.map(q=>({img:q.src,cap:q.cap.trim()})), at:Date.now(), by:judge()||'?'};
+  if(!$('upTitle').value.trim()) return alert('Nhập tiêu đề tác phẩm!');
+  if(!$('upDesc').value.trim()) return alert('Phần nội dung / ý nghĩa là bắt buộc!');
+  const g={id:'g'+Date.now(), team:$('upTeam').value.trim(), title:$('upTitle').value.trim(), members:$('upMembers').value.trim(), desc:$('upDesc').value.trim(), items:queue.map(q=>({img:q.src,cap:q.cap.trim()})), at:Date.now(), by:judge()||'?'};
   groups.unshift(g);
-  queue=[]; renderQueue(); $('upTeam').value=''; $('upDesc').value='';
+  queue=[]; renderQueue(); $('upTeam').value=''; $('upTitle').value=''; $('upMembers').value=''; $('upDesc').value='';
   save(); fbSet('groups/'+g.id, g);
   render(); gotoTab(canScore()?'score':'board'); alert(`Đã đăng nhóm "${g.team}" (${g.items.length} ảnh)!`);
 };
@@ -866,8 +944,8 @@ $('restoreFile').onchange = e=>{
 $('btnExport').onclick = ()=>{
   if(!isAdmin()) return alert('Chỉ Admin được xuất file!');
   const q = s => '"'+String(s??'').replace(/"/g,'""')+'"';
-  let csv='Hang,Nhom,So anh,Y nghia,Diem TB,Y tuong,Noi dung,Tham my,Luot cham\n';
-  [...groups].sort((a,b)=>avg(b.id)-avg(a.id)).forEach((g,i)=>{ csv+=`${i+1},${q(g.team)},${g.items.length},${q(g.desc)},${cnt(g.id)?avg(g.id).toFixed(2):''},${cnt(g.id)?avgC(g.id,'c1').toFixed(2):''},${cnt(g.id)?avgC(g.id,'c2').toFixed(2):''},${cnt(g.id)?avgC(g.id,'c3').toFixed(2):''},${cnt(g.id)}\n`; });
+  let csv='Hang,Nhom,Tieu de,Thanh vien,So anh,Y nghia,Diem TB,Y tuong,Noi dung,Tham my,Luot cham\n';
+  [...groups].sort((a,b)=>avg(b.id)-avg(a.id)).forEach((g,i)=>{ csv+=`${i+1},${q(g.team)},${q(g.title)},${q(g.members)},${g.items.length},${q(g.desc)},${cnt(g.id)?avg(g.id).toFixed(2):''},${cnt(g.id)?avgC(g.id,'c1').toFixed(2):''},${cnt(g.id)?avgC(g.id,'c2').toFixed(2):''},${cnt(g.id)?avgC(g.id,'c3').toFixed(2):''},${cnt(g.id)}\n`; });
   const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob(["\ufeff"+csv],{type:'text/csv'})); a.download='ket-qua-cham-anh.csv'; a.click();
 };
 
