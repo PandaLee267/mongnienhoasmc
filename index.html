@@ -80,7 +80,7 @@
   <!-- Hero banner cuộc thi -->
   <div class="relative rounded-3xl overflow-hidden mb-4 ring-1 ring-blue-300/30 shadow-[0_0_70px_rgba(80,120,255,.35)]">
     <div class="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-[#0a1445] to-[#24348f] p-8 text-center">
-      <p class="text-amber-200 tracking-[0.2em] text-xs font-bold">🌸 MỘNG NIÊN HOA | DREAMS OF YOUTH 🌸</p>
+      <p class="text-amber-200 tracking-[0.08em] md:tracking-[0.2em] text-xs font-bold">🌸 MỘNG NIÊN HOA | DREAMS OF YOUTH 🌸</p>
       <h1 class="text-4xl md:text-5xl font-extrabold text-white">MỘNG NIÊN HOA</h1>
       <p class="text-blue-200/80 text-sm italic mt-1">Nơi thanh xuân được kể bằng những khung hình</p>
     </div>
@@ -144,7 +144,7 @@
   <!-- BOARD TAB -->
   <div id="tab-board" class="hidden">
     <div class="text-center mb-4">
-      <p class="text-amber-200 tracking-[0.25em] text-[11px] font-bold">MỘNG NIÊN HOA | DREAMS OF YOUTH</p>
+      <p class="text-amber-200 tracking-[0.1em] md:tracking-[0.25em] text-[11px] font-bold">MỘNG NIÊN HOA | DREAMS OF YOUTH</p>
       <h2 class="show-title text-3xl md:text-4xl font-extrabold text-white">🏆 BẢNG XẾP HẠNG</h2>
     </div>
     <div class="flex gap-2 mb-4 flex-wrap" id="adminBar">
@@ -219,7 +219,7 @@
     </div>
   </div>
   <footer class="text-center mt-10 pb-6">
-    <div class="inline-flex items-center gap-2 text-xs text-slate-500 bg-white/5 border border-white/10 rounded-full px-5 py-2">
+    <div class="inline-flex flex-wrap justify-center items-center gap-x-2 gap-y-1 text-xs text-center text-slate-500 bg-white/5 border border-white/10 rounded-2xl md:rounded-full px-5 py-2 max-w-full">
       <span>🌸 MỘNG NIÊN HOA | DREAMS OF YOUTH 🌸</span>
       <span class="text-slate-700">•</span>
       <span>Nguồn: <b class="text-amber-300/90">SMCSAODO</b></span>
@@ -233,7 +233,7 @@
   <div class="w-full max-w-md rounded-3xl overflow-hidden ring-1 ring-blue-300/30 shadow-[0_0_80px_rgba(80,120,255,.4)]" style="background:linear-gradient(160deg,rgba(23,38,100,.96),rgba(9,16,52,.98))">
     <div class="relative bg-[#0a1445]">
       <div class="absolute inset-0 flex items-center justify-center p-6 text-center">
-        <p class="text-amber-200 tracking-[0.2em] text-[11px] font-bold">MỘNG NIÊN HOA | DREAMS OF YOUTH</p>
+        <p class="text-amber-200 tracking-[0.08em] md:tracking-[0.2em] text-[11px] font-bold">MỘNG NIÊN HOA | DREAMS OF YOUTH</p>
       </div>
       <img src="ảnh nền cuộc thi.jpg" alt="Mộng Niên Hoa | Dreams of Youth" class="relative w-full" onerror="this.remove()">
       <div class="absolute bottom-0 inset-x-0 h-16 pointer-events-none" style="background:linear-gradient(to top,#141f5c,transparent)"></div>
@@ -273,7 +273,7 @@
 <div id="resultsShow" class="hidden fixed inset-0 z-[120] overflow-y-auto" style="background:radial-gradient(ellipse at 50% 0%,#1b2a6b 0%,#060d2b 65%)">
   <canvas id="confetti" class="fixed inset-0 pointer-events-none"></canvas>
   <div class="min-h-full flex flex-col items-center px-4 py-10 max-w-2xl mx-auto w-full">
-    <p class="text-amber-200 tracking-[0.25em] text-[11px] font-bold">MỘNG NIÊN HOA | DREAMS OF YOUTH</p>
+    <p class="text-amber-200 tracking-[0.1em] md:tracking-[0.25em] text-[11px] font-bold">MỘNG NIÊN HOA | DREAMS OF YOUTH</p>
     <h2 class="show-title text-4xl md:text-5xl font-extrabold text-white mt-1">🏆 KẾT QUẢ</h2>
     <div id="showStage" class="w-full space-y-3 mt-8"></div>
     <div class="flex gap-2 mt-8">
@@ -797,10 +797,10 @@ $('btnCert').onclick = ()=>{
         <img src="${(g.items[0]||{}).img||''}" class="w-16 h-16 object-cover shrink-0" style="border-radius:16px;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.15)">
         <div class="flex-1 min-w-0">
           <div class="font-extrabold truncate" style="color:#0a1445">${esc(g.team)}</div>
-          ${g.members?`<div class="text-[11px] italic" style="color:#64748b">${esc(g.members).replace(/\n/g,'<br>')}</div>`:''}
+          ${g.members?`<div class="text-[11px] italic leading-snug" style="color:#64748b;overflow-wrap:anywhere">${esc(g.members).replace(/\n/g,'<br>')}</div>`:''}
           <div class="mt-1"><span class="cute-chip">💡 ${avgC(g.id,'c1').toFixed(1)}</span><span class="cute-chip">💭 ${avgC(g.id,'c2').toFixed(1)}</span><span class="cute-chip">🎨 ${avgC(g.id,'c3').toFixed(1)}</span></div>
         </div>
-        <div class="cute-score font-extrabold text-3xl shrink-0">⭐ ${avg(g.id).toFixed(1)}</div>
+        <div class="cute-score font-extrabold text-2xl md:text-3xl shrink-0">⭐ ${avg(g.id).toFixed(1)}</div>
       </div>`).join('')+`</div>
     <p class="text-center text-xs mt-4" style="color:#a21caf">💖 Cảm ơn các nhóm đã tham gia — thanh xuân rực rỡ! 💖</p>
   </div>`;
