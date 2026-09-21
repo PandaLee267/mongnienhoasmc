@@ -153,6 +153,7 @@
       <button id="btnRestore" class="px-4 py-2 rounded-xl bg-slate-600 font-bold text-sm">📥 Khôi phục</button>
       <input id="restoreFile" type="file" accept="application/json" class="hidden">
       <button id="btnPublish" class="px-4 py-2 rounded-xl bg-amber-500 text-black font-bold text-sm">📢 Công bố</button>
+      <a href="./tinh-diem-tuong-tac.html" target="_blank" class="px-4 py-2 rounded-xl bg-pink-600 font-bold text-sm">💕 Tính điểm tương tác (BGK 60% + TT 40%)</a>
       <button id="btnToggleDetail" class="px-4 py-2 rounded-xl bg-slate-700 font-bold text-sm">👁 Hiện chi tiết ai chấm</button>
       <button id="btnReset" class="px-4 py-2 rounded-xl bg-red-600/80 font-bold text-sm">🗑 Xóa toàn bộ</button>
     </div>
@@ -359,6 +360,7 @@ if(!groups){ // tự chuyển dữ liệu ảnh lẻ cũ sang nhóm (giữ nguy�
   localStorage.removeItem('pc_photos');
 }
 let scores = JSON.parse(localStorage.getItem('pc_scores')||'{}'); // {groupId:{judge:{c1,c2,c3,score,comment,at}}}
+let inter = JSON.parse(localStorage.getItem('pc_inter')||'{}'); // {groupId:{like,cmt,share}} — nhập từ trang tinh-diem-tuong-tac.html
 let useFb = false, db = null, showDetail = false, currentId = null, boardAnimated = false;
 const $ = id => document.getElementById(id);
 const esc = s => String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -373,7 +375,12 @@ const totalOf = v => (v.c1!=null ? (+v.c1 + +v.c2 + +v.c3)/3 : +v.score||0);
 const avg = id => { const s = Object.values(scores[id]||{}); return s.length ? s.reduce((a,b)=>a+totalOf(b),0)/s.length : 0; };
 const avgC = (id,k) => { const s = Object.values(scores[id]||{}).filter(v=>v[k]!=null); return s.length ? s.reduce((a,b)=>a+ +b[k],0)/s.length : 0; };
 const cnt = id => Object.keys(scores[id]||{}).length;
-const save = () => { try{ localStorage.setItem('pc_groups',JSON.stringify(groups)); localStorage.setItem('pc_scores',JSON.stringify(scores)); }catch(e){ alert('⚠️ Bộ nhớ máy đầy (nhiều ảnh quá)! Hãy kết nối Firebase để lưu online, hoặc xóa bớt ảnh.'); } };
+// tổng hợp BGK 60% + tương tác 40% (chung công thức trang tinh-diem-tuong-tac.html)
+const rawI = id => { const t = inter[id]||{}; return (+t.like||0) + (+t.cmt||0)*2 + (+t.share||0)*3; };
+const maxRawI = () => Math.max(0, ...groups.map(rawI));
+const ttI = id => { const m = maxRawI(); return m ? rawI(id)/m*100 : 0; };
+const finalI = id => avg(id)*10*0.6 + ttI(id)*0.4;
+const save = () => { try{ localStorage.setItem('pc_groups',JSON.stringify(groups)); localStorage.setItem('pc_scores',JSON.stringify(scores)); localStorage.setItem('pc_inter',JSON.stringify(inter)); }catch(e){ alert('⚠️ Bộ nhớ máy đầy (nhiều ảnh quá)! Hãy kết nối Firebase để lưu online, hoặc xóa bớt ảnh.'); } };
 // (đăng nhập qua màn hình login, không còn nhập tên tự do)
 
 // ---------- phân quyền: admin (thấy ai chấm) / judge (chấm) / uploader (gửi ảnh + xem điểm) ----------
@@ -575,6 +582,7 @@ function connectFb(cfg){
       }
     });
     db.ref('scores').on('value', s=>{ scores = s.val()||{}; render(); });
+    db.ref('interaction').on('value', s=>{ inter = s.val()||{}; try{localStorage.setItem('pc_inter',JSON.stringify(inter));}catch(e){} render(); });
     db.ref('settings/adminPass').on('value', s=>{ if(s.val()) localStorage.setItem('pc_admin_pass',s.val()); });
     db.ref('settings/judges').on('value', s=>{ if(s.val()){ judges=s.val(); localStorage.setItem('pc_judges',JSON.stringify(judges)); if(role==='judge'&&judgeUser&&!judges[judgeUser]){ $('btnLogout').click(); return; } applyRole(); } });
     db.ref('settings/viewerPass').on('value', s=>{ if(s.val()) localStorage.setItem('pc_viewer_pass',s.val()); });
@@ -656,15 +664,16 @@ function render(){
     g.appendChild(el);
   });
   if(groupId && !$('tab-group').classList.contains('hidden')) openGroup(groupId); // điểm chung tự tươi khi máy khác chấm
-  // board: podium 2-1-3 + bảng hạng 4+
-  const sorted=[...groups].sort((x,y)=>avg(y.id)-avg(x.id)||cnt(y.id)-cnt(x.id));
+  // board: podium 2-1-3 + bảng hạng 4+ — xếp theo TỔNG (BGK 60% + TT 40%)
+  const byFinal=(x,y)=>finalI(y.id)-finalI(x.id)||avg(y.id)-avg(x.id);
+  const sorted=[...groups].sort(byFinal);
   if(!published && !isAdmin()){ $('boardList').innerHTML='<p class="text-center text-slate-400 py-10">📢 Kết quả chưa được BTC công bố.<br><span class="text-xs text-slate-500">Quay lại sau khi BGK chấm xong nhé!</span></p>'; return; }
   if(!sorted.length){ $('boardList').innerHTML='<p class="text-center text-slate-500 py-10">🏆 Chưa có nhóm dự thi nào.</p>'; return; }
   const medal=['🥇','🥈','🥉'];
   const ringC=['ring-amber-400/70','ring-slate-300/50','ring-orange-400/50'];
   const bar=(v,c)=>`<div class="flex-1 h-1.5 rounded-full bg-slate-700/70 overflow-hidden"><div class="h-full rounded-full" style="width:${(Math.max(0,v)/10*100).toFixed(0)}%;background:${c}"></div></div>`;
   const scored=sorted.filter(g=>cnt(g.id)>0);
-  const top=[...scored].sort((x,y)=>avg(y.id)-avg(x.id)).slice(0,3);
+  const top=[...scored].sort(byFinal).slice(0,3);
   const podIds=new Set(top.map(g=>g.id));
   const anim=boardAnimated?'':'pod';
   let podium='';
@@ -679,8 +688,9 @@ function render(){
         <img src="${(g.items[0]||{}).img||''}" class="w-full ${big?'h-32 md:h-48':'h-20 md:h-28'} object-cover rounded-2xl ring-2 ${ringC[k]} ${big?'shadow-[0_0_40px_rgba(245,158,11,.45)]':''}">
         <div class="font-bold truncate mt-1 ${big?'text-base md:text-lg':'text-xs md:text-sm'}">👥 ${esc(g.team)}</div>
         ${g.title?`<div class="text-[11px] text-amber-200/80 truncate">📌 ${esc(g.title)}</div>`:''}
-        <div class="text-amber-400 font-extrabold ${big?'text-3xl md:text-4xl':'text-xl'}">⭐ ${avg(g.id).toFixed(2)}</div>
-        <div class="text-[11px] text-slate-500">${cnt(g.id)} BGK • ${g.items.length} ảnh</div>
+        <div class="text-amber-400 font-extrabold ${big?'text-3xl md:text-4xl':'text-xl'}">🏆 ${finalI(g.id).toFixed(2)}</div>
+        <div class="text-[11px] text-slate-500">BGK ${(avg(g.id)*10).toFixed(1)} • TT ${ttI(g.id).toFixed(0)} • ${g.items.length} ảnh</div>
+        ${rawI(g.id)?`<div class="text-[11px] text-emerald-300 font-bold">🏆 ${finalI(g.id).toFixed(2)} <span class="font-normal text-slate-500">(TT ${ttI(g.id).toFixed(0)})</span></div>`:''}
         ${big?'':`<div class="${stepH[k]} rounded-t-xl mt-1 flex items-start justify-center pt-1 text-xl font-extrabold text-slate-900/60" style="background:${stepBg[k]}">${k+1}</div>`}
       </div>`;}).join('')+`</div>`
       +(top[0]?`<div class="mx-auto w-[44%] h-20 md:h-24 rounded-t-xl flex items-start justify-center pt-1 text-2xl font-extrabold text-amber-950/70" style="background:linear-gradient(180deg,#fde68a,#b45309)">1</div>`:'');
@@ -698,13 +708,13 @@ function render(){
         <div class="flex gap-1 mt-1.5">${bar(avgC(g.id,'c1'),'#fbbf24')}${bar(avgC(g.id,'c2'),'#60a5fa')}${bar(avgC(g.id,'c3'),'#f472b6')}</div>
         ${showDetail?`<div class="text-xs text-slate-400 mt-1">${Object.entries(scores[g.id]||{}).map(([j,v])=>`${esc(j)}: <b class="text-slate-200">${totalOf(v).toFixed(1)}</b> <span class="text-slate-500">(${v.c1??'–'}/${v.c2??'–'}/${v.c3??'–'})</span>${v.comment?' ('+esc(v.comment)+')':''}`).join('<br>')||'Chưa có điểm'}</div>`:''}
       </div>
-      <div class="text-right shrink-0"><div class="text-amber-400 font-extrabold text-xl">⭐ ${cnt(g.id)?avg(g.id).toFixed(2):'–'}</div><div class="text-[10px] text-slate-500">${cnt(g.id)} BGK</div></div>
+      <div class="text-right shrink-0"><div class="text-amber-400 font-extrabold text-xl">⭐ ${cnt(g.id)?avg(g.id).toFixed(2):'–'}</div><div class="text-[10px] text-slate-500">${cnt(g.id)} BGK</div>${cnt(g.id)||rawI(g.id)?`<div class="text-[11px] text-emerald-300 font-bold mt-0.5">🏆 ${finalI(g.id).toFixed(2)}</div><div class="text-[10px] text-slate-500">TT ${ttI(g.id).toFixed(0)}</div>`:''}</div>
       ${isAdmin()?`<button onclick="event.stopPropagation();delGroup('${g.id}')" class="text-xs bg-slate-700 px-2 py-1 rounded-lg shrink-0">Xóa</button>`:''}
     </div>`;}).join('')+`</div>`:'';
   $('boardList').innerHTML = podium+rows;
   boardAnimated=true;
 }
-window.delGroup = id => { if(!isAdmin()) return alert('Chỉ Admin được xóa!'); if(!confirm('Xóa cả nhóm này?'))return; groups=groups.filter(g=>g.id!==id); delete scores[id]; save(); fbDel('groups/'+id); fbDel('scores/'+id); render(); };
+window.delGroup = id => { if(!isAdmin()) return alert('Chỉ Admin được xóa!'); if(!confirm('Xóa cả nhóm này?'))return; groups=groups.filter(g=>g.id!==id); delete scores[id]; delete inter[id]; save(); fbDel('groups/'+id); fbDel('scores/'+id); fbDel('interaction/'+id); render(); };
 // ---------- Admin sửa nhanh nhóm (không mất điểm đã chấm) ----------
 let editId=null;
 function openEdit(id){
@@ -785,7 +795,7 @@ $('btnPublish').onclick = ()=>{ if(!isAdmin()) return; published=!published; sav
 const cuteMedal=['🥇','🥈','🥉'];
 $('btnCert').onclick = ()=>{
   if(!published && !isAdmin()) return;
-  const top=[...groups].filter(g=>cnt(g.id)>0).sort((x,y)=>avg(y.id)-avg(x.id)).slice(0,3);
+  const top=[...groups].filter(g=>cnt(g.id)>0).sort((x,y)=>finalI(y.id)-finalI(x.id)||avg(y.id)-avg(x.id)).slice(0,3);
   if(!top.length) return alert('Chưa có nhóm nào được chấm điểm!');
   $('certList').innerHTML=`<div class="cute-card">
     <div class="text-center mt-4 mb-1 text-xs font-bold tracking-widest" style="color:#a21caf">🌸 MỘNG NIÊN HOA | DREAMS OF YOUTH 🌸</div>
@@ -800,7 +810,7 @@ $('btnCert').onclick = ()=>{
           ${g.members?`<div class="text-[11px] italic leading-snug" style="color:#64748b;overflow-wrap:anywhere">${esc(g.members).replace(/\n/g,'<br>')}</div>`:''}
           <div class="mt-1"><span class="cute-chip">💡 ${avgC(g.id,'c1').toFixed(1)}</span><span class="cute-chip">💭 ${avgC(g.id,'c2').toFixed(1)}</span><span class="cute-chip">🎨 ${avgC(g.id,'c3').toFixed(1)}</span></div>
         </div>
-        <div class="cute-score font-extrabold text-2xl md:text-3xl shrink-0">⭐ ${avg(g.id).toFixed(1)}</div>
+        <div class="cute-score font-extrabold text-2xl md:text-3xl shrink-0">🏆 ${finalI(g.id).toFixed(1)}</div>
       </div>`).join('')+`</div>
     <p class="text-center text-xs mt-4" style="color:#a21caf">💖 Cảm ơn các nhóm đã tham gia — thanh xuân rực rỡ! 💖</p>
   </div>`;
@@ -816,12 +826,13 @@ function openShow(){
 }
 function runShow(){
   try{ ac(); }catch(e){} // mở sẵn loa trong lúc bấm
-  const sorted=[...groups].filter(g=>cnt(g.id)>0).sort((x,y)=>avg(y.id)-avg(x.id));
+  const sorted=[...groups].filter(g=>cnt(g.id)>0).sort((x,y)=>finalI(y.id)-finalI(x.id)||avg(y.id)-avg(x.id));
   const st=$('showStage'); st.innerHTML='';
   if(!sorted.length){ st.innerHTML='<p class="text-center text-slate-300 py-8">Chưa có điểm nào để công bố.</p>'; return; }
   const medal=['🥇','🥈','🥉'];
   const ringC=['ring-amber-400/70','ring-slate-300/50','ring-orange-400/50'];
-  const countUp=(el,target)=>{ const t0=performance.now(); (function cu(t){ const p=Math.min(1,(t-t0)/900); el.textContent='⭐ '+(target*(1-Math.pow(1-p,3))).toFixed(2); if(p<1)requestAnimationFrame(cu); })(t0); };
+  const countUp=(el,target)=>{ const t0=performance.now(); (function cu(t){ const p=Math.min(1,(t-t0)/900); el.textContent='🏆 '+(target*(1-Math.pow(1-p,3))).toFixed(2); if(p<1)requestAnimationFrame(cu); })(t0); };
+  const breakdown=g=>`BGK ${(avg(g.id)*10).toFixed(1)}×60% + TT ${ttI(g.id).toFixed(0)}×40%`;
   st.innerHTML=`<div id="podZone" class="flex items-end justify-center gap-2 md:gap-4 mb-6"></div><div id="tblZone" class="w-full space-y-2"></div>`;
   const slots={};
   [1,0,2].forEach(k=>{ // bục trống 2-1-3 chờ lấp đầy
@@ -842,10 +853,10 @@ function runShow(){
           <div class="text-3xl mb-1">${big?'<span class="crown">👑</span><br>':''}${medal[rank]}</div>
           <img src="${(g.items[0]||{}).img||''}" class="w-full ${big?'h-32 md:h-44':'h-20 md:h-28'} object-cover rounded-2xl ring-2 ${ringC[rank]} cursor-pointer">
           <div class="font-bold truncate mt-1 ${big?'text-base':'text-sm'}">👥 ${esc(g.team)}</div>
-          <div class="pts text-amber-400 font-extrabold ${big?'text-3xl':'text-xl'}">⭐ 0.00</div>
-          <div class="text-[11px] text-slate-400">${cnt(g.id)} BGK • ${g.items.length} ảnh</div></div>`;
+          <div class="pts text-amber-400 font-extrabold ${big?'text-3xl':'text-xl'}">🏆 0.00</div>
+          <div class="text-[11px] text-slate-400">${breakdown(g)}</div></div>`;
         s.querySelector('img').onclick=()=>{ $('resultsShow').classList.add('hidden'); openGroup(g.id); };
-        countUp(s.querySelector('.pts'), avg(g.id));
+        countUp(s.querySelector('.pts'), finalI(g.id));
         if(rank===0){ fanfare(); boom(); }
       } else { // top 4+ vào bảng
         const d=document.createElement('div');
@@ -855,12 +866,12 @@ function runShow(){
           <img src="${(g.items[0]||{}).img||''}" class="w-16 h-14 object-cover rounded-xl shrink-0 cursor-pointer">
           <div class="flex-1 min-w-0">
             <div class="font-bold truncate">👥 ${esc(g.team)}</div>
-            <div class="text-xs text-slate-400">${g.items.length} ảnh • ${cnt(g.id)} BGK</div>
+            <div class="text-xs text-slate-400">${breakdown(g)}</div>
           </div>
-          <div class="text-right shrink-0"><div class="pts text-amber-400 font-extrabold text-2xl">⭐ 0.00</div></div>`;
+          <div class="text-right shrink-0"><div class="pts text-amber-400 font-extrabold text-2xl">🏆 0.00</div></div>`;
         d.querySelector('img').onclick=()=>{ $('resultsShow').classList.add('hidden'); openGroup(g.id); };
         $('tblZone').prepend(d);
-        countUp(d.querySelector('.pts'), avg(g.id));
+        countUp(d.querySelector('.pts'), finalI(g.id));
       }
     }, ri*1100);
   });
@@ -924,7 +935,7 @@ $('btnUpload').onclick = ()=>{
 const dl = (name,blob) => { const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; a.click(); };
 $('btnBackup').onclick = ()=>{
   if(!isAdmin()) return alert('Chỉ Admin!');
-  dl('backup-mong-nien-hoa.json', new Blob([JSON.stringify({app:'mong-nien-hoa',exportedAt:new Date().toISOString(),groups,scores,judges,lock,published,eventDate})],{type:'application/json'}));
+  dl('backup-mong-nien-hoa.json', new Blob([JSON.stringify({app:'mong-nien-hoa',exportedAt:new Date().toISOString(),groups,scores,inter,judges,lock,published,eventDate})],{type:'application/json'}));
 };
 $('btnRestore').onclick = ()=>{ if(!isAdmin()) return alert('Chỉ Admin!'); $('restoreFile').click(); };
 $('restoreFile').onchange = e=>{
@@ -936,6 +947,7 @@ $('restoreFile').onchange = e=>{
     if(!gs.length||!d.scores) return alert('File backup không hợp lệ!');
     if(!confirm(`Khôi phục backup (${gs.length} nhóm, xuất lúc ${d.exportedAt||'?'})? Dữ liệu hiện tại sẽ bị thay thế!`)) return;
     groups=gs; scores=d.scores; if(d.judges) judges=d.judges; if(d.lock) lock=d.lock; if(d.published!=null) published=!!d.published; if(d.eventDate!=null) eventDate=d.eventDate||'';
+    if(d.inter){ inter=d.inter; Object.entries(inter).forEach(([id,v])=>fbSet('interaction/'+id,v)); }
     saveEventDate();
     save(); saveJudges(); saveLock(); savePublished(); syncPush(); applyRole(); alert('Đã khôi phục!');
   }catch(err){ alert('File lỗi: '+err.message); } e.target.value=''; };
@@ -944,8 +956,8 @@ $('restoreFile').onchange = e=>{
 $('btnExport').onclick = ()=>{
   if(!isAdmin()) return alert('Chỉ Admin được xuất file!');
   const q = s => '"'+String(s??'').replace(/"/g,'""')+'"';
-  let csv='Hang,Nhom,Tieu de,Thanh vien,So anh,Y nghia,Diem TB,Y tuong,Noi dung,Tham my,Luot cham\n';
-  [...groups].sort((a,b)=>avg(b.id)-avg(a.id)).forEach((g,i)=>{ csv+=`${i+1},${q(g.team)},${q(g.title)},${q(g.members)},${g.items.length},${q(g.desc)},${cnt(g.id)?avg(g.id).toFixed(2):''},${cnt(g.id)?avgC(g.id,'c1').toFixed(2):''},${cnt(g.id)?avgC(g.id,'c2').toFixed(2):''},${cnt(g.id)?avgC(g.id,'c3').toFixed(2):''},${cnt(g.id)}\n`; });
+  let csv='Hang,Nhom,Tieu de,Thanh vien,So anh,Y nghia,Diem BGK,Y tuong,Noi dung,Tham my,Luot cham,Diem TT,Tong 60-40\n';
+  [...groups].sort((x,y)=>finalI(y.id)-finalI(x.id)||avg(y.id)-avg(x.id)).forEach((g,i)=>{ csv+=`${i+1},${q(g.team)},${q(g.title)},${q(g.members)},${g.items.length},${q(g.desc)},${cnt(g.id)?avg(g.id).toFixed(2):''},${cnt(g.id)?avgC(g.id,'c1').toFixed(2):''},${cnt(g.id)?avgC(g.id,'c2').toFixed(2):''},${cnt(g.id)?avgC(g.id,'c3').toFixed(2):''},${cnt(g.id)},${ttI(g.id).toFixed(2)},${(cnt(g.id)||rawI(g.id)?finalI(g.id).toFixed(2):'')}\n`; });
   const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob(["\ufeff"+csv],{type:'text/csv'})); a.download='ket-qua-cham-anh.csv'; a.click();
 };
 
