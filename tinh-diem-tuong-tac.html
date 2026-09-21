@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mộng Niên Hoa — Tính Điểm Tương Tác (đồng bộ Firebase)</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%230a1445'/%3E%3Cg fill='%23f9a8d4'%3E%3Cellipse cx='32' cy='18' rx='8' ry='12'/%3E%3Cellipse cx='32' cy='18' rx='8' ry='12' transform='rotate(72 32 32)'/%3E%3Cellipse cx='32' cy='18' rx='8' ry='12' transform='rotate(144 32 32)'/%3E%3Cellipse cx='32' cy='18' rx='8' ry='12' transform='rotate(216 32 32)'/%3E%3Cellipse cx='32' cy='18' rx='8' ry='12' transform='rotate(288 32 32)'/%3E%3C/g%3E%3Ccircle cx='32' cy='32' r='6' fill='%23fde68a'/%3E%3C/svg%3E">
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;color:#eaf2ff;min-height:100vh;background:#0a1445 url('ảnh nền cuộc thi.jpg') center/cover fixed no-repeat}
+body::before{content:'';position:fixed;inset:0;background:linear-gradient(180deg,rgba(8,16,60,.55),rgba(8,16,60,.88));z-index:-1}
+.wrap{max-width:1020px;margin:0 auto;padding:28px 18px 60px}
+.hero{text-align:center;padding:38px 22px;border-radius:22px;background:rgba(255,255,255,.08);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.22);box-shadow:0 18px 50px rgba(0,0,0,.4)}
+.hero h1{font-family:Georgia,serif;font-size:clamp(30px,5vw,52px);letter-spacing:1px;text-shadow:0 3px 20px rgba(150,200,255,.6)}
+.hero h1 span{font-style:italic;font-weight:400;font-size:.6em;display:block;color:#ffe9a8}
+.hero p{margin-top:8px;color:#cfe0ff}
+.badge{display:inline-block;margin-top:12px;padding:6px 16px;border-radius:99px;background:linear-gradient(90deg,#ffd76e,#ff9d5c);color:#3a2200;font-weight:700;font-size:14px}
+.badge.off{background:#475569;color:#fff}
+.card{margin-top:20px;background:rgba(255,255,255,.94);color:#16205a;border-radius:18px;padding:22px;box-shadow:0 12px 34px rgba(0,0,0,.35)}
+.card h2{font-size:19px;margin-bottom:10px}
+.formula{background:#0f1c6b;color:#fff;border-radius:12px;padding:14px 16px;font-size:15px;line-height:1.8}
+.formula b{color:#ffd76e}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:12px}
+.grid label{font-size:13px;font-weight:600;color:#3a4480}
+.grid input{width:100%;margin-top:4px;padding:10px 12px;border-radius:10px;border:1.5px solid #c6d2ff;font-size:15px;outline:none}
+.grid input:focus{border-color:#4a63e7}
+.btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+button{cursor:pointer;border:none;border-radius:12px;padding:11px 20px;font-weight:700;font-size:15px}
+.btn-add{background:linear-gradient(90deg,#4a63e7,#7b5cff);color:#fff}
+.btn-demo{background:#eef1ff;color:#3340a8}
+.btn-clear{background:#fff0f0;color:#c0392b;border:1px solid #f3c1c1}
+.table-wrap{overflow-x:auto;margin-top:12px;border-radius:12px;border:1px solid #dfe6ff}
+table{width:100%;border-collapse:collapse;font-size:14px;min-width:760px;background:#fff}
+th{background:#0f1c6b;color:#ffe9a8;padding:11px 8px;font-size:13px}
+td{padding:6px;text-align:center;border-bottom:1px solid #eef1ff}
+td input{width:82px;padding:7px;border-radius:8px;border:1.5px solid #c6d2ff;text-align:center;font-size:14px}
+td input.name{width:140px;text-align:left}
+.rank1{background:#fff8dd}.rank2{background:#f3f5ff}.rank3{background:#fff3ec}
+.pill{display:inline-block;min-width:52px;padding:4px 10px;border-radius:99px;background:#0f1c6b;color:#fff;font-weight:800}
+.top{margin-top:14px;padding:14px;border-radius:12px;background:linear-gradient(90deg,#fff6d6,#ffe9ec);border:1px dashed #d9a441;font-size:15px;color:#5a3c00}
+.note{font-size:13px;color:#5a6aa8;margin-top:10px;line-height:1.7}
+.del{background:none;color:#c0392b;font-size:18px;padding:4px 8px}
+.livebar{background:#eefbf1;border:1px solid #b8e6c3;color:#14532d;border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.7}
+#loginOverlay{position:fixed;inset:0;background:rgba(4,8,31,.9);display:flex;align-items:center;justify-content:center;z-index:50;padding:18px}
+#loginOverlay .box{background:#fff;color:#16205a;border-radius:18px;padding:28px;width:100%;max-width:380px;text-align:center}
+#loginOverlay input{width:100%;margin-top:10px;padding:11px 14px;border-radius:10px;border:1.5px solid #c6d2ff;font-size:15px;outline:none}
+#loginErr{color:#c0392b;font-size:13px;min-height:20px;margin-top:8px}
+@media(max-width:640px){td input{width:64px}td input.name{width:100px}}
+</style>
+</head>
+<body>
+<div id="loginOverlay">
+  <div class="box">
+    <h2>🔐 Tính điểm tương tác</h2>
+    <p style="font-size:13px;color:#5a6aa8;margin-top:6px">Đăng nhập bằng <b>TK admin</b> hoặc <b>TK BGK</b> của trang chấm điểm chính.</p>
+    <input id="loginUser" placeholder="Tên đăng nhập (admin / tên BGK...)">
+    <input id="loginPass" type="password" placeholder="Mật khẩu">
+    <div id="loginErr"></div>
+    <button class="btn-add" style="width:100%;margin-top:8px" onclick="doLogin()">Đăng nhập</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="hero">
+    <h1>Mộng Niên Hoa<span>DREAMS OF YOUTH — Cuộc Thi Ảnh</span></h1>
+    <p>Nơi thanh xuân được kể bằng những khung hình ✨</p>
+    <div class="badge off" id="syncBadge">⏳ Đang kết nối...</div>
+    <div style="margin-top:12px"><a href="index.html" style="display:inline-block;padding:9px 20px;border-radius:12px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.35);color:#fff;font-weight:700;font-size:14px;text-decoration:none">← Về trang chấm điểm chính</a></div>
+  </div>
+
+  <div class="card" id="liveCard" style="display:none">
+    <div class="livebar">🟢 <b>Chế độ đồng bộ:</b> danh sách nhóm + điểm BGK lấy <b>live từ trang chấm điểm chính</b> (điểm BGK = trung bình các BGK ×10 ra thang 100). Bạn chỉ cần nhập <b>💕 🗨️ 🔥</b> ở bảng dưới — mọi máy thấy giống nhau ngay. Thêm nhóm mới thì sang trang chính → tab <b>Đăng ảnh</b>.</div>
+  </div>
+
+  <div class="card" id="manualCard">
+    <h2>🎀 Cách tính điểm</h2>
+    <div class="formula">
+      <b>Điểm tổng = Điểm BGK × 60% + Điểm tương tác × 40%</b> (thang 100)<br>
+      💕 1 like = <b>1 điểm</b> &nbsp;•&nbsp;
+      🗨️ 1 comment chuẩn (tag 2 bạn + số năm thành lập CLB SMC) = <b>2 điểm</b> &nbsp;•&nbsp;
+      🔥 1 share = <b>3 điểm</b><br>
+      Điểm thô = Like×1 + Comment×2 + Share×3 &nbsp;→&nbsp; <b>Điểm tương tác = Điểm thô / Điểm thô cao nhất × 100</b>
+    </div>
+    <div class="grid" id="manualForm">
+      <label>Tên nhóm<input id="fName" placeholder="VD: Nhóm 1"></label>
+      <label>Điểm BGK (0–100)<input id="fBgk" type="number" min="0" max="100" value="85"></label>
+      <label>💕 Likes<input id="fLike" type="number" min="0" value="100"></label>
+      <label>🗨️ Comments chuẩn<input id="fCmt" type="number" min="0" value="20"></label>
+      <label>🔥 Shares<input id="fShare" type="number" min="0" value="30"></label>
+    </div>
+    <div class="btns" id="manualBtns">
+      <button class="btn-add" onclick="addRow()">＋ Thêm nhóm</button>
+      <button class="btn-demo" onclick="loadDemo()">Nạp ví dụ mẫu</button>
+      <button class="btn-clear" onclick="clearAll()">Xóa hết</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📊 Bảng điểm & xếp hạng <span id="count" style="color:#7b83bb;font-weight:400"></span></h2>
+    <div class="table-wrap"><table>
+      <thead><tr>
+        <th>Hạng</th><th>Nhóm</th><th>BGK /100</th><th>💕</th><th>🗨️</th><th>🔥</th>
+        <th>Điểm thô</th><th>Tương tác /100</th><th>Tổng điểm</th><th></th>
+      </tr></thead>
+      <tbody id="tbody"></tbody>
+    </table></div>
+    <div class="top" id="winner">Chưa có dữ liệu.</div>
+    <p class="note" id="noteLine"></p>
+  </div>
+</div>
+
+<script>
+// ---------- utils ----------
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const raw = r => (+r.like||0) + (+r.cmt||0)*2 + (+r.share||0)*3;
+// ponytail: cùng công thức trang chính — BGK thang 10 → ×10 ra thang 100
+const totalOf = v => (v.c1 != null ? (+v.c1 + +v.c2 + +v.c3) / 3 : +v.score || 0);
+
+// ---------- đăng nhập: chung TK trang chính (admin / TK BGK đã tạo) ----------
+const getPass = () => localStorage.getItem('pc_admin_pass') || 'admin123';
+const getJudges = () => { try { return JSON.parse(localStorage.getItem('pc_judges') || '{}'); } catch(e){ return {}; } };
+function doLogin(){
+  const u = $('loginUser').value.trim(), p = $('loginPass').value;
+  const judges = getJudges();
+  if ((u === 'admin' && p === getPass()) || (judges[u] && judges[u] === p)) {
+    sessionStorage.setItem('td_me', u);
+    $('loginOverlay').style.display = 'none';
+    boot();
+  } else $('loginErr').textContent = 'Sai tài khoản/mật khẩu. Dùng TK admin hoặc TK BGK (mở trang chính 1 lần để đồng bộ danh sách TK).';
+}
+['loginUser','loginPass'].forEach(i => $(i).addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); }));
+if (sessionStorage.getItem('td_me')) $('loginOverlay').style.display = 'none';
+
+// ---------- dữ liệu ----------
+const FB_CONFIG = {"apiKey":"AIzaSyB1BfLyLmMxXHomSAMrLy6T3NRViFAmy2A","authDomain":"mong-nien-hoa-smc.firebaseapp.com","databaseURL":"https://mong-nien-hoa-smc-default-rtdb.firebaseio.com","projectId":"mong-nien-hoa-smc","storageBucket":"mong-nien-hoa-smc.firebasestorage.app","messagingSenderId":"1078036805932","appId":"1:1078036805932:web:0787665a60d0be98c51489"};
+let mode = 'manual'; // manual = offline / dự phòng trên máy này
+let rows = JSON.parse(localStorage.getItem('smc_scores_v2') || '[]');
+let groups = [], scores = {}, inter = {}, db = null;
+const save = () => localStorage.setItem('smc_scores_v2', JSON.stringify(rows));
+
+// ---------- chế độ thủ công (dự phòng khi mất mạng) ----------
+function addRow(){
+  const name = $('fName').value.trim() || ('Nhóm ' + (rows.length + 1));
+  rows.push({name, bgk:+$('fBgk').value||0, like:+$('fLike').value||0, cmt:+$('fCmt').value||0, share:+$('fShare').value||0});
+  $('fName').value=''; save(); render();
+}
+function loadDemo(){
+  if(rows.length && !confirm('Nạp ví dụ mẫu sẽ THAY THẾ bảng hiện tại. Tiếp tục?')) return;
+  rows = [
+    {name:'Nhóm 1', bgk:92, like:320, cmt:85, share:120},
+    {name:'Nhóm 2', bgk:88, like:500, cmt:60, share:90},
+    {name:'Nhóm 3', bgk:95, like:150, cmt:40, share:200},
+  ];
+  save(); render();
+}
+function clearAll(){ if(confirm('Xóa hết bảng điểm?')){ rows=[]; save(); render(); } }
+function del(i){ rows.splice(i,1); save(); render(); }
+
+// ---------- chế độ đồng bộ Firebase ----------
+const avg10 = id => { const s = Object.values(scores[id] || {}); return s.length ? s.reduce((a,b) => a + totalOf(b), 0) / s.length : 0; };
+const cntBgk = id => Object.keys(scores[id] || {}).length;
+const liveRows = () => groups.map(g => Object.assign(
+  {key:g.id, name:g.team || g.id, bgk:+(avg10(g.id) * 10).toFixed(2), n:cntBgk(g.id)},
+  {like:0, cmt:0, share:0}, inter[g.id] || {}
+));
+function setInter(id, field, val){
+  inter[id] = Object.assign({like:0, cmt:0, share:0}, inter[id] || {}, {[field]: val});
+  if (db) db.ref('interaction/' + id).set(inter[id]); // 2 máy nhập cùng lúc: lần nhập sau thắng, không mất nhóm khác
+  render();
+}
+function boot(){
+  render();
+  if (typeof firebase === 'undefined') return offline();
+  try {
+    if (!firebase.apps.length) firebase.initializeApp(FB_CONFIG);
+    db = firebase.database();
+    db.ref('groups').on('value', s => { groups = Object.values(s.val() || {}); goLive(); });
+    db.ref('scores').on('value', s => { scores = s.val() || {}; if (mode === 'live') render(); });
+    db.ref('interaction').on('value', s => { inter = s.val() || {}; if (mode === 'live') render(); });
+    db.ref('settings/adminPass').on('value', s => { if (s.val()) localStorage.setItem('pc_admin_pass', s.val()); });
+    db.ref('settings/judges').on('value', s => { if (s.val()) localStorage.setItem('pc_judges', JSON.stringify(s.val())); });
+    setTimeout(() => { if (mode !== 'live') offline(); }, 6000);
+  } catch(e){ offline(); }
+}
+function goLive(){
+  mode = 'live';
+  $('syncBadge').textContent = '🟢 ĐỒNG BỘ FIREBASE — chung số liệu với trang chính';
+  $('syncBadge').classList.remove('off');
+  $('liveCard').style.display = '';
+  $('manualForm').style.display = 'none';
+  $('manualBtns').style.display = 'none';
+  render();
+}
+function offline(){
+  if (mode === 'live') return;
+  mode = 'manual';
+  $('syncBadge').textContent = '⚠️ OFFLINE — nhập thủ công trên máy này';
+  $('syncBadge').classList.add('off');
+  render();
+}
+
+// ---------- render chung ----------
+function render(){
+  const data = mode === 'live' ? liveRows() : rows.map((r,i) => Object.assign({key:i}, r));
+  const maxRaw = Math.max(0, ...data.map(raw));
+  const calc = data.map(d => Object.assign({}, d, {raw: raw(d), tt: maxRaw ? raw(d) / maxRaw * 100 : 0}));
+  calc.forEach(c => c.total = c.bgk * 0.6 + c.tt * 0.4);
+  calc.sort((a,b) => b.total - a.total);
+  $('count').textContent = data.length ? `(${data.length} nhóm)` : '';
+  const medal = ['🥇','🥈','🥉'];
+  $('tbody').innerHTML = calc.map((c,rank) => `
+    <tr class="${rank===0&&calc.length>1?'rank1':rank===1?'rank2':rank===2?'rank3':''}">
+      <td>${data.length ? (medal[rank] || (rank+1)) : ''}</td>
+      <td>${mode==='live' ? esc(c.name) : `<input class="name" value="${esc(c.name)}" onchange="rows[${c.key}].name=this.value;save();render()">`}</td>
+      <td>${mode==='live'
+        ? `<b>${c.bgk.toFixed(1)}</b><br><span style="font-size:11px;color:#7b83bb">${c.n} BGK</span>`
+        : `<input type="number" min="0" max="100" value="${c.bgk}" onchange="rows[${c.key}].bgk=+this.value||0;save();render()">`}</td>
+      ${['like','cmt','share'].map(f => mode==='live'
+        ? `<td><input type="number" min="0" value="${c[f]}" onchange="setInter('${c.key}','${f}',+this.value||0)"></td>`
+        : `<td><input type="number" min="0" value="${c[f]}" onchange="rows[${c.key}].${f}=+this.value||0;save();render()"></td>`).join('')}
+      <td>${c.raw}</td>
+      <td>${c.tt.toFixed(2)}</td>
+      <td><span class="pill">${c.total.toFixed(2)}</span></td>
+      <td>${mode==='live' ? '' : `<button class="del" onclick="del(${c.key})" title="Xóa">×</button>`}</td>
+    </tr>`).join('') || `<tr><td colspan="10" style="padding:22px;color:#889">${mode==='live' ? 'Chưa có nhóm nào — sang trang chính → Đăng ảnh 👆' : 'Chưa có nhóm — thêm ở form bên trên 👆'}</td></tr>`;
+  if (calc.length) {
+    const w = calc[0];
+    $('winner').innerHTML = `👑 Dẫn đầu: <b>${esc(w.name)}</b> — Tổng <b>${w.total.toFixed(2)}</b> (BGK ${w.bgk.toFixed(1)} ×60% = ${(w.bgk*0.6).toFixed(2)} + Tương tác ${w.tt.toFixed(2)} ×40% = ${(w.tt*0.4).toFixed(2)}) · Thô ${w.raw} = ${w.like}×1 + ${w.cmt}×2 + ${w.share}×3`;
+  } else $('winner').textContent = 'Chưa có dữ liệu.';
+  $('noteLine').textContent = mode === 'live'
+    ? '* Điểm BGK = trung bình điểm các BGK trên trang chính (quy ra thang 100). Điểm tương tác chuẩn hóa theo nhóm có điểm thô cao nhất. Số like/cmt/share nhập ở đây lưu chung Firebase, máy nào mở cũng giống nhau.'
+    : '* Đang offline: số liệu chỉ nằm trên máy này. Có mạng + đăng nhập lại để đồng bộ Firebase.';
+}
+if (sessionStorage.getItem('td_me')) boot(); else render();
+</script>
+</body>
+</html>
