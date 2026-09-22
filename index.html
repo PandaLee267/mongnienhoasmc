@@ -153,12 +153,11 @@
       <button id="btnRestore" class="px-4 py-2 rounded-xl bg-slate-600 font-bold text-sm">📥 Khôi phục</button>
       <input id="restoreFile" type="file" accept="application/json" class="hidden">
       <button id="btnPublish" class="px-4 py-2 rounded-xl bg-amber-500 text-black font-bold text-sm">📢 Công bố</button>
-      <a href="./tinh-diem-tuong-tac.html" target="_blank" class="px-4 py-2 rounded-xl bg-pink-600 font-bold text-sm">💕 Tính điểm tương tác (BGK 60% + TT 40%)</a>
       <button id="btnToggleDetail" class="px-4 py-2 rounded-xl bg-slate-700 font-bold text-sm">👁 Hiện chi tiết ai chấm</button>
       <button id="btnReset" class="px-4 py-2 rounded-xl bg-red-600/80 font-bold text-sm">🗑 Xóa toàn bộ</button>
     </div>
     <p id="viewerNote" class="hidden text-xs text-slate-500 mb-3">🔒 Bạn đang ở quyền xem điểm: chỉ thấy điểm trung bình chung, không thấy ai chấm bao nhiêu.</p>
-    <div class="text-center mb-4 flex gap-2 justify-center flex-wrap"><button id="btnShow" class="px-6 py-2.5 rounded-xl bg-amber-500 text-black font-bold" style="box-shadow:0 0 24px rgba(245,158,11,.5)">🎬 Xem công bố kết quả</button><button id="btnCert" class="px-6 py-2.5 rounded-xl bg-violet-600 font-bold">🍭 Thẻ top BGK</button></div>
+    <div class="text-center mb-4 flex gap-2 justify-center flex-wrap"><button id="btnShow" class="px-6 py-2.5 rounded-xl bg-amber-500 text-black font-bold" style="box-shadow:0 0 24px rgba(245,158,11,.5)">🎬 Xem công bố kết quả</button><button id="btnCert" class="px-6 py-2.5 rounded-xl bg-violet-600 font-bold">🍭 Thẻ top BGK</button><a id="btnInter" href="./tinh-diem-tuong-tac.html" target="_blank" class="px-6 py-2.5 rounded-xl bg-pink-600 font-bold">💕 Chấm điểm tương tác</a></div>
     <div id="boardList" class="space-y-3"></div>
   </div>
 
@@ -419,6 +418,7 @@ function openGroup(id){
           ${gd.title?`<p class="text-amber-200 font-bold mt-1">📌 ${esc(gd.title)}</p>`:''}
           ${gd.members?`<p class="text-xs text-slate-400 mt-1">🧑‍🤝‍🧑 Thành viên:<br>${esc(gd.members).replace(/\n/g,'<br>')}</p>`:''}
           ${gd.desc?`<p class="text-sm text-slate-300 italic mt-1">💭 ${esc(gd.desc)}</p>`:''}
+          ${((published||isAdmin())?Object.values(scores[id]||{}).map(v=>(v.comment||'').trim()).filter(Boolean):[]).length?`<div class="text-sm bg-slate-900 rounded-xl p-3 mt-2"><p class="text-xs font-bold text-amber-200 mb-1">💬 Nhận xét BGK (ẩn danh)</p>${Object.values(scores[id]).map(v=>(v.comment||'').trim()).filter(Boolean).map(c=>`<p class="text-slate-300 italic">“${esc(c)}”</p>`).join('')}</div>`:''}
           <p class="text-xs text-slate-500 mt-1">📷 ${gd.items.length} ảnh • ⭐ Trung bình chung: <b class="text-amber-400">${n?a.toFixed(2):'–'}</b> (${n} lượt chấm)</p>
         </div>
         <div class="flex gap-2 shrink-0">
@@ -488,6 +488,7 @@ function applyRole(){
   $('adminBar').style.display = isAdmin()?'':'none';
   $('btnShow').style.display = (published||isAdmin())?'':'none';
   $('btnCert').style.display = (published||isAdmin())?'':'none';
+  $('btnInter').style.display = (isAdmin()||role==='judge')?'':'none';
   $('viewerNote').classList.toggle('hidden', isAdmin());
   // trạng thái chốt điểm
   const dl = lock.deadline ? new Date(lock.deadline).toLocaleString('vi-VN') : 'chưa đặt';
